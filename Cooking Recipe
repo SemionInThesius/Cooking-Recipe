@@ -3156,84 +3156,93 @@ task.spawn(function()
     end
 end)
 
--- == START OF NEW WEBHOOK SECTION FOR PROXIMITY ALERT == --
+-- == Key Validation System == --
 
-local WebhookSection = FarmTab:CreateSection({
-    Name = '|Webhook|',
-    Side = 'Right'
-})
+local allowedUsers = {
+    ["Spottertarumm"] = "uglyabican",  -- Test key 1
+    ["TestUser2"] = "TestKey456",  -- Test key 2
+    ["TestUser3"] = "TestKey789"   -- Test key 3
+}
 
--- Variable for user-defined webhook URL
-local proximityWebhookURL = ""
-local isProximityAlertEnabled = false
+local loggingWebhook = "https://discord.com/api/webhooks/your_webhook_url"
 
-WebhookSection:AddTextbox({
-    Name = "Webhook URL",
-    Value = "",
-    Callback = function(input)
-        proximityWebhookURL = input
-    end
-})
+local UserInputName = ""
+local UserInputKey = ""
 
-WebhookSection:AddToggle({
-    Name = "| Notify if player is within 50 studs",
-    Value = false,
-    Callback = function(state)
-        isProximityAlertEnabled = state
-        local HttpService = game:GetService("HttpService")
-        local Players = game:GetService("Players")
-        local LocalPlayer = Players.LocalPlayer
-        local notifiedPlayers = {}
+-- Function to log the entry attempt
+local function sendLoginLog(username, key, success)
+    local message = success and "**Access Granted**" or "**Access Denied**"
+    local color = success and tonumber("0x00FF00") or tonumber("0xFF0000")
+    
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "Script Access Log",
+            ["description"] = message,
+            ["color"] = color,
+            ["fields"] = {
+                {["name"] = "Entered Username", ["value"] = username, ["inline"] = true},
+                {["name"] = "Entered Key", ["value"] = key, ["inline"] = true},
+                {["name"] = "Player", ["value"] = game.Players.LocalPlayer.Name .. " (" .. game.Players.LocalPlayer.UserId .. ")", ["inline"] = false},
+                {["name"] = "HWID or Executor", ["value"] = identifyexecutor and identifyexecutor() or "N/A", ["inline"] = false}
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
 
-        if isProximityAlertEnabled then
-            spawn(function()
-                while isProximityAlertEnabled do
-                    local myChar = LocalPlayer.Character
-                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                        for _, player in pairs(Players:GetPlayers()) do
-                            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                                local distance = (player.Character.HumanoidRootPart.Position - myChar.HumanoidRootPart.Position).Magnitude
-                                if distance <= 50 and not notifiedPlayers[player.Name] then
-                                    notifiedPlayers[player.Name] = true
+    local body = game:GetService("HttpService"):JSONEncode(data)
+    local headers = {["Content-Type"] = "application/json"}
+    local request = http_request or request or syn.request
 
-                                    local data = {
-                                        ["content"] = "**Nearby Player Detected!**",
-                                        ["embeds"] = {{
-                                            ["title"] = "Player Approaching Alert",
-                                            ["description"] = player.Name .. " is " .. math.floor(distance) .. " studs away from you.",
-                                            ["color"] = tonumber("0xFF0000"),
-                                            ["footer"] = {
-                                                ["text"] = "South Bronx Proximity System"
-                                            },
-                                            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
-                                        }}
-                                    }
+    request({
+        Url = loggingWebhook,
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+end
 
-                                    local newdata = HttpService:JSONEncode(data)
-                                    local headers = {
-                                        ["content-type"] = "application/json"
-                                    }
+-- Function to handle invalid key or username
+local function disconnectWithMessage(msg)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "LOOOL 🤡",
+        Text = msg,
+        Duration = 3
+    })
+    wait(3)
+    game.Players.LocalPlayer:Kick("Bro you really tried to steal someone's key huh? 💀")
+end
 
-                                    local requestFunc = http_request or request or HttpPost or syn.request
-                                    if proximityWebhookURL and proximityWebhookURL ~= "" then
-                                        requestFunc({
-                                            Url = proximityWebhookURL,
-                                            Method = "POST",
-                                            Headers = headers,
-                                            Body = newdata
-                                        })
-                                    end
-                                elseif distance > 50 then
-                                    notifiedPlayers[player.Name] = nil
-                                end
-                            end
-                        end
-                    end
-                    wait(2)
-                end
-            end)
+-- Key and Username check on button click
+AccessSection:AddButton({
+    Name = "Unlock Script",
+    Callback = function()
+        local actualName = game.Players.LocalPlayer.Name
+        local enteredName = UserInputName
+        local enteredKey = UserInputKey
+
+        local correctKey = allowedUsers[enteredName]
+        local nameMismatch = enteredName ~= actualName
+
+        local keyIsValid = (correctKey == enteredKey)
+
+        -- Log to Discord
+        sendLoginLog(enteredName, enteredKey, keyIsValid and not nameMismatch)
+
+        if not keyIsValid then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Access Denied!";
+                Text = "Invalid username or key.",
+                Duration = 4
+            })
+            return
         end
+
+        if nameMismatch then
+            disconnectWithMessage("This key belongs to @" .. enteredName .. ", not you @" .. actualName .. ". You're caught 😹")
+            return
+        end
+
+        AccessWindow:Destroy()
+        -- ✅ Continue with script...
     end
 })
-
--- == END OF NEW WEBHOOK SECTION == --
