@@ -81,6 +81,19 @@ MainSection:AddToggle({
     end
 })
 
+MainSection:AddToggle{
+    Name = "| Insta-Interact",
+    Callback = function()
+         for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do
+         if v:IsA("ProximityPrompt") then
+            v["HoldDuration"] = 0
+         end
+      end
+      game:GetService("ProximityPromptService").PromptButtonHoldBegan:Connect(function(v)
+         v["HoldDuration"] = 0
+      end)
+    end
+}
 MainSection:AddToggle({
     Name = "| Fly ( V )",
     StartingState = false,
@@ -114,14 +127,6 @@ Mouse.Target:Destroy()
 end)
     end
 }
-
-    MainSection:AddToggle({
-        Name = '| Instant Interact',
-        Callback = function(state)
-            onToggleChangedInstantProximity(state)
-        end
-    })
-
 MainSection:AddToggle{
     Name = '| Infinite Zoom',
     Callback = function(state)
@@ -3150,3 +3155,85 @@ task.spawn(function()
         warn("TP Spam + Mass Buy birleştirme hatası: " .. tostring(err))
     end
 end)
+
+-- == START OF NEW WEBHOOK SECTION FOR PROXIMITY ALERT == --
+
+local WebhookSection = FarmTab:CreateSection({
+    Name = '|Webhook|',
+    Side = 'Right'
+})
+
+-- Variable for user-defined webhook URL
+local proximityWebhookURL = ""
+local isProximityAlertEnabled = false
+
+WebhookSection:AddTextbox({
+    Name = "Webhook URL",
+    Value = "",
+    Callback = function(input)
+        proximityWebhookURL = input
+    end
+})
+
+WebhookSection:AddToggle({
+    Name = "| Notify if player is within 50 studs",
+    Value = false,
+    Callback = function(state)
+        isProximityAlertEnabled = state
+        local HttpService = game:GetService("HttpService")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local notifiedPlayers = {}
+
+        if isProximityAlertEnabled then
+            spawn(function()
+                while isProximityAlertEnabled do
+                    local myChar = LocalPlayer.Character
+                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                        for _, player in pairs(Players:GetPlayers()) do
+                            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                                local distance = (player.Character.HumanoidRootPart.Position - myChar.HumanoidRootPart.Position).Magnitude
+                                if distance <= 50 and not notifiedPlayers[player.Name] then
+                                    notifiedPlayers[player.Name] = true
+
+                                    local data = {
+                                        ["content"] = "**Nearby Player Detected!**",
+                                        ["embeds"] = {{
+                                            ["title"] = "Player Approaching Alert",
+                                            ["description"] = player.Name .. " is " .. math.floor(distance) .. " studs away from you.",
+                                            ["color"] = tonumber("0xFF0000"),
+                                            ["footer"] = {
+                                                ["text"] = "South Bronx Proximity System"
+                                            },
+                                            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+                                        }}
+                                    }
+
+                                    local newdata = HttpService:JSONEncode(data)
+                                    local headers = {
+                                        ["content-type"] = "application/json"
+                                    }
+
+                                    local requestFunc = http_request or request or HttpPost or syn.request
+                                    if proximityWebhookURL and proximityWebhookURL ~= "" then
+                                        requestFunc({
+                                            Url = proximityWebhookURL,
+                                            Method = "POST",
+                                            Headers = headers,
+                                            Body = newdata
+                                        })
+                                    end
+                                elseif distance > 50 then
+                                    notifiedPlayers[player.Name] = nil
+                                end
+                            end
+                        end
+                    end
+                    wait(2)
+                end
+            end)
+        end
+    end
+})
+
+-- == END OF NEW WEBHOOK SECTION == --
