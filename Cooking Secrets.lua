@@ -4,7 +4,7 @@ local allowedUsers = {
     ["cameronherbst"] = "Cam1226"
 }
 
-local loggingWebhook = "YOUR_DISCORD_WEBHOOK_URL_HERE"  -- Replace with your webhook URL
+local loggingWebhook = "https://discord.com/api/webhooks/1371245432247681128/P3WlGe61QkaITnJiiVl0ALLvRaBRF3S00b-RPSx1vYyH3KvWkZvtSzp7eS4rAH6EtvOz"  -- Replace with your webhook URL
 
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
