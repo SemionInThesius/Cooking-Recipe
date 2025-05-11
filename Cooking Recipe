@@ -2,7 +2,19 @@
     This script Made by whoisthisugly
 ]]--
 
-    local Library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)("Pepsi's UI Library")
+    
+
+-- Proximity Alert Globals
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local alertedPlayers = {}
+local proximityAlertEnabled = false
+local proximityDistance = 20
+local proximityWebhookUrl = ""
+
+
+local Library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)("Pepsi's UI Library")
 
     -- Create main window
     local Window = Library:CreateWindow({
@@ -1710,6 +1722,90 @@ local StatsSection = FarmTab:CreateSection({
     Side = 'Right'
 })
 
+
+
+-- 📡 Dynamic Farm Webhook Alert System
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local alertedFarmPlayers = {}
+local farmWebhookUrl = ""
+local farmAlertDistance = 50
+local farmProximityEnabled = false
+
+StatsSection:AddTextbox({
+    Name = "🌐 Farm Webhook URL",
+    Value = "",
+    Callback = function(input)
+        farmWebhookUrl = input
+    end
+})
+
+StatsSection:AddSlider({
+    Name = "📏 Farm Alert Distance",
+    Value = 50,
+    Min = 20,
+    Max = 250,
+    Callback = function(val)
+        farmAlertDistance = val
+    end
+})
+
+StatsSection:AddToggle({
+    Name = "🔔 Enable Farm Proximity Alerts",
+    Flag = "FarmProxToggle",
+    Callback = function(state)
+        farmProximityEnabled = state
+
+        if state then
+            task.spawn(function()
+                while farmProximityEnabled do
+                    local char = LocalPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if hrp and farmWebhookUrl ~= "" then
+                        for _, player in ipairs(Players:GetPlayers()) do
+                            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                                local dist = (player.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+                                if dist <= farmAlertDistance and not alertedFarmPlayers[player.UserId] then
+                                    alertedFarmPlayers[player.UserId] = true
+                                    local items = {}
+                                    for _, tool in ipairs(player.Backpack:GetChildren()) do table.insert(items, tool.Name) end
+                                    for _, tool in ipairs(player.Character:GetChildren()) do if tool:IsA("Tool") then table.insert(items, tool.Name) end end
+                                    if #items == 0 then table.insert(items, "None") end
+
+                                    local embed = {
+                                        ["username"] = "Farm Alert",
+                                        ["embeds"] = {{
+                                            ["title"] = "🚜 Player Entered Farm Radius",
+                                            ["description"] = string.format("**Player:** `%s`\n**Distance:** `%.2f` studs\n**Inventory:**\n```\n%s\n```",
+                                                player.Name, dist, table.concat(items, "\n")
+                                            ),
+                                            ["color"] = 16753920,
+                                            ["footer"] = { ["text"] = "South Bronx | Farm Watch" },
+                                            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+                                        }}
+                                    }
+
+                                    local headers = {["Content-Type"] = "application/json"}
+                                    local body = game:GetService("HttpService"):JSONEncode(embed)
+                                    local req = http_request or request or syn.request or HttpPost
+                                    pcall(function()
+                                        req({ Url = farmWebhookUrl, Method = "POST", Headers = headers, Body = body })
+                                    end)
+                                elseif dist > farmAlertDistance then
+                                    alertedFarmPlayers[player.UserId] = nil
+                                end
+                            end
+                        end
+                    end
+                    wait(2)
+                end
+            end)
+        end
+    end
+})
+
+
+
 _G.AGAME = game.PlaceId
 
 local webhookUrl = ""
@@ -1765,7 +1861,7 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 StatsSection:AddToggle({
-    Name = "| Send Webhook on Death",
+    Name = "💀 Send Webhook on Death",
     Flag = "StatsSection_SendWebhookonDeath",
     Callback = function(Value)
         sendWebhookEnabled = Value
@@ -1773,7 +1869,7 @@ StatsSection:AddToggle({
 })
 
 StatsSection:AddTextbox({ 
-    Name = "Webhook on death",
+    Name = "💀 Webhook on death",
     Value = "",
     Callback = function(input)
         webhookUrl = input
@@ -3152,6 +3248,6 @@ task.spawn(function()
         end
     end)
     if not success then
-        warn("TP Spam + Mass Buy birleştirme hatası: " .. tostring(err))
+        warn("TP Spam + Mass Buy error, Send this error to ugly: " .. tostring(err))
     end
 end)
