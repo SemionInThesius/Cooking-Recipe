@@ -1,5 +1,5 @@
 local allowedUsers = {
-    ["J89DA9GX6O"] = "admin",
+    ["Ranviralt2"] = "admin",
     ["pleasegimmeerwin"] = "stinkyfart32",
     ["cameronherbst"] = "Cam1226",
     ["Mahmutkrsgl"] = "1903",
