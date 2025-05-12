@@ -2,23 +2,12 @@
     This script Made by whoisthisugly
 ]]--
 
-    
-
--- Proximity Alert Globals
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local alertedPlayers = {}
-local proximityAlertEnabled = false
-local proximityDistance = 20
-local proximityWebhookUrl = ""
-
 
 local Library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)("Pepsi's UI Library")
 
     -- Create main window
     local Window = Library:CreateWindow({
-        Name = "whoisthisugly South Bronx",
+        Name = "whoisthisugly V1.2",
         Themeable = {
             Info = 'By whoisthisugly',
             Credit = True, -- Shows library 
