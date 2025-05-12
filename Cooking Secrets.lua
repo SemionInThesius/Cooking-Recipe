@@ -125,7 +125,7 @@ submitBtn.MouseButton1Click:Connect(function()
             Duration = 4
         })
         wait(2)
-        player:Kick("Access Denied: Incorrect Key.")
+        player:Kick("Access Denied: Incorrect Key, What you trying to do Black Nigger?.")
         return
     end
 
