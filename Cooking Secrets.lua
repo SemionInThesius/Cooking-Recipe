@@ -1,5 +1,5 @@
 local allowedUsers = {
-    ["ShadowTiger201075"] = "admin",
+    ["J89DA9GX6O"] = "admin",
     ["pleasegimmeerwin"] = "stinkyfart32",
     ["cameronherbst"] = "Cam1226",
     ["Mahmutkrsgl"] = "1903",
@@ -12,7 +12,6 @@ local allowedUsers = {
     ["KronicIz"] = "Mcboss413",
     ["zxytoxd"] = "oompaloompa",
     ["SebastianDuckMaster"] = "oompaloompa",
-    ["null"] = "null",
     ["null"] = "null",
     ["null"] = "null",
     ["null"] = "null",
