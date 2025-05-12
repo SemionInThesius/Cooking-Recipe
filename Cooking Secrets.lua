@@ -2,6 +2,17 @@ local allowedUsers = {
     ["ShadowTiger201075"] = "admin",
     ["pleasegimmeerwin"] = "stinkyfart32",
     ["cameronherbst"] = "Cam1226"
+    ["Mahmutkrsgl"] = "1903"
+    ["Mercy_emo"] = "1904"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
 }
 
 local loggingWebhook = "https://discord.com/api/webhooks/1371245432247681128/P3WlGe61QkaITnJiiVl0ALLvRaBRF3S00b-RPSx1vYyH3KvWkZvtSzp7eS4rAH6EtvOz"  -- Replace with your webhook URL
