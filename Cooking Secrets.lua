@@ -38,6 +38,11 @@ local allowedUsers = {
     ["finnadestroyaboss"] = "imgayngl",
     ["augustosienna"] = "collin999",
     ["XxSebastianMaxxX2017"] = "loompa",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
 }
 
 -- 🎮 Oyun ID → Script URL eşleşmesi
@@ -94,6 +99,26 @@ keyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
 keyBox.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
 Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 10)
 
+-- ❌ Kapatma Butonu
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Text = "X"
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 10)
+closeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 20
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+closeBtn.MouseButton1Click:Connect(function()
+    TweenService:Create(frame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(blur, TweenInfo.new(0.3), {Size = 0}):Play()
+    task.wait(0.3)
+    gui:Destroy()
+    blur:Destroy()
+end)
+
+
 local verifyBtn = Instance.new("TextButton", frame)
 verifyBtn.Size = UDim2.new(0.85, 0, 0, 40)
 verifyBtn.Position = UDim2.new(0.075, 0, 0, 145)
@@ -140,7 +165,7 @@ local function checkKey()
     sendLog(name, input, valid)
 
     if not valid then
-        player:Kick("Access Denied: Incorrect Key")
+        player:Kick("Access Denied: Are you dumb you fucking nigger? you realy entered it wrong? bruhh just dont use it if you this dumb fr")
         return
     end
 
