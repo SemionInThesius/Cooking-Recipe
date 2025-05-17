@@ -38,32 +38,15 @@ local allowedUsers = {
     ["finnadestroyaboss"] = "imgayngl",
     ["augustosienna"] = "collin999",
     ["XxSebastianMaxxX2017"] = "loompa",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
 }
 
--- 🎮 Oyun ID → Script URL
+-- 🎮 Oyun ID → Script URL eşleşmesi
 local scriptMap = {
     [10179538382] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
     [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua"
 }
 
--- 🕵️‍♂️ Webhook gizli kodlanmış
+-- 🕵️‍♂️ Webhook (gizli, parça parça kodlanmış)
 local a1 = {104,116,116,112,115,58,47,47}
 local a2 = {100,105,115,99,111,114,100,46,99,111,109}
 local a3 = {47,97,112,105,47,119,101,98,104,111,111,107,115,47}
@@ -73,10 +56,12 @@ local a6 = {86,108,48,65,76,76,118,82,97,66,82,70,51,83,48,48,98,45}
 local a7 = {82,80,83,120,49,118,89,121,72,51,75,118,87,107,90,118,116,83,122,112,55,101,83,52,114,65,72,54,69,116,118,79,122}
 local webhookURL = string.char(unpack(a1))..string.char(unpack(a2))..string.char(unpack(a3))..string.char(unpack(a4))..string.char(unpack(a5))..string.char(unpack(a6))..string.char(unpack(a7))
 
--- 🎨 GUI Setup
-local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
+-- 🌫️ Blur efekti
+local blur = Instance.new("BlurEffect")
+blur.Parent = game:GetService("Lighting")
 TweenService:Create(blur, TweenInfo.new(0.5), {Size = 12}):Play()
 
+-- 🧱 GUI setup
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "KeyAuth"
 gui.ResetOnSpawn = false
@@ -145,7 +130,7 @@ local function sendLog(username, enteredKey, status)
     end)
 end
 
--- ✅ Doğrulama ve script çalıştırma fonksiyonu
+-- ✅ Doğrulama ve script çalıştırma
 local function checkKey()
     local name = player.Name
     local input = keyBox.Text
@@ -159,7 +144,7 @@ local function checkKey()
         return
     end
 
-    -- 🎉 Access Granted UI + Sound
+    -- 🎉 Access Granted UI + Ses
     local grantedFrame = Instance.new("Frame", gui)
     grantedFrame.Size = UDim2.new(0, 300, 0, 100)
     grantedFrame.Position = UDim2.new(0.5, -150, 0.5, -50)
@@ -193,7 +178,6 @@ local function checkKey()
     gui:Destroy()
     blur:Destroy()
 
-    -- 🔽 Script çalıştır
     local url = scriptMap[game.PlaceId]
     if url then
         loadstring(game:HttpGet(url))()
@@ -202,7 +186,7 @@ local function checkKey()
     end
 end
 
--- 🔘 Buton ve ⌨️ Enter
+-- 🔘 Tıklama ve ⌨️ Enter
 verifyBtn.MouseButton1Click:Connect(checkKey)
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
