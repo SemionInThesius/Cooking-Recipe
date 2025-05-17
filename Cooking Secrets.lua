@@ -40,7 +40,7 @@ local allowedUsers = {
     ["XxSebastianMaxxX2017"] = "loompa",
     ["saulc_bestnewacc"] = "District",
     ["Saulc_bestalt3"] = "District12",
-    ["null"] = "null",
+    ["CommandroOps"] = "COMO293",
     ["null"] = "null",
     ["null"] = "null",
 }
