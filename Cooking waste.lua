@@ -145,7 +145,7 @@ GunTpSection:Button({
 })
 
 RunService.Stepped:Connect(function()
-    updateGunList()
+    
 end)
 
 
@@ -275,6 +275,83 @@ ESPSection:Toggle({
 		end
 	end,
 })
+
+-- LEVEL ESP MODULE
+local levelEspEnabled = false
+
+local function createLevelESP(player)
+    local char = player.Character
+    if not char or not char:FindFirstChild("Head") then return end
+
+    if char:FindFirstChild("LevelESP") then return end
+
+    local levelVal = player:FindFirstChild("PlayerStatistics") and player.PlayerStatistics:FindFirstChild("Level")
+    if not levelVal then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "LevelESP"
+    billboard.Adornee = char.Head
+    billboard.Size = UDim2.new(0, 100, 0, 20)
+    billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = char
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(0, 255, 255)
+    label.TextStrokeTransparency = 0.5
+    label.TextScaled = true
+    label.Text = "Level: " .. tostring(levelVal.Value)
+    label.Parent = billboard
+
+    -- Otomatik güncelleme
+    levelVal:GetPropertyChangedSignal("Value"):Connect(function()
+        label.Text = "Level: " .. tostring(levelVal.Value)
+    end)
+end
+
+local function clearLevelESP()
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("LevelESP") then
+            player.Character.LevelESP:Destroy()
+        end
+    end
+end
+
+local function toggleLevelESP(state)
+    levelEspEnabled = state
+    if not state then
+        clearLevelESP()
+        return
+    end
+
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            createLevelESP(player)
+            player.CharacterAdded:Connect(function()
+                task.wait(1)
+                createLevelESP(player)
+            end)
+        end
+    end
+
+    game:GetService("Players").PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function()
+            task.wait(1)
+            createLevelESP(player)
+        end)
+    end)
+end
+
+ESPSection:Toggle({
+    Name = "| Level ESP",
+    Default = false,
+    Callback = function(state)
+        toggleLevelESP(state)
+    end,
+})
+
 
 
 -- AIMBOT, SILENT AIM & ESP CONFIG
@@ -583,6 +660,18 @@ local function hasPackage()
     return false
 end
 
+local mailPrompt = workspace:WaitForChild("PneumaMail_System")
+	:WaitForChild("PneumaMail")
+	:WaitForChild("Cylinder")
+	:WaitForChild("Attachment")
+	:WaitForChild("ProximityPrompt")
+
+mailPrompt.HoldDuration = 0
+mailPrompt.MaxActivationDistance = 90
+
+
+
+
 local function tpLook(pos, target)
     Character:PivotTo(CFrame.new(pos, target.Position))
     Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
@@ -824,44 +913,74 @@ AutoFarmSection:Button({
 
 -- GUN MODS SECTION
 local GunModsSection = AutoFarmTab:Section({ Side = "Right" })
+
 local currentSettings = {
     BaseDMG = 32,
     Recoil = 0.9,
     Firerate = 550,
     AmmoPerMag = 16,
     BulletSpread = 0.1,
-    DmgBoost = 1.05
+    DmgBoost = 1.05,
+    ShotgunFire = false
 }
 
 local function applyGunSettings()
-    local tool = LocalPlayer.Backpack:FindFirstChild("Old World CR-1")
-    if tool and tool:FindFirstChild("SETTINGS") then
-        local settingsModule = require(tool.SETTINGS)
-        local settings = settingsModule.ReturnAllSettings()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return end
 
-        for key, val in pairs(currentSettings) do
-            settings[key] = val
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool:FindFirstChild("SETTINGS") then
+            local success, module = pcall(require, tool.SETTINGS)
+            if success and type(module) == "table" and module.ReturnAllSettings then
+                local settingsArray = module.ReturnAllSettings()
+                if type(settingsArray) == "table" then
+                    for key, val in pairs(currentSettings) do
+                        if settingsArray[key] ~= nil then
+                            settingsArray[key] = val
+                        end
+                    end
+                end
+            end
+
+            if tool:FindFirstChild("Ammo") then
+                tool.Ammo.Value = currentSettings.AmmoPerMag
+            elseif tool:FindFirstChild("CurrentAmmo") then
+                tool.CurrentAmmo.Value = currentSettings.AmmoPerMag
+            end
         end
+    end
 
-        print("✅ Gun settings applied.")
-        Window:Notify({
-            Title = "Gun Mods",
-            Description = "Old World CR-1 updated.",
-            Lifetime = 3
+    print("✅ Gun settings applied to all guns in backpack.")
+    Window:Notify({
+        Title = "Gun Mods",
+        Description = "All backpack guns updated.",
+        Lifetime = 3
+    })
+end
+
+for key, val in pairs(currentSettings) do
+    if type(val) == "boolean" then
+        GunModsSection:Toggle({
+            Name = key,
+            Default = val,
+            Callback = function(state)
+                currentSettings[key] = state
+                applyGunSettings()
+            end
+        })
+    else
+        GunModsSection:Slider({
+            Name = key,
+            Default = val,
+            Minimum = 0,
+            Maximum = key == "BaseDMG" and 500 or key == "Firerate" and 2000 or key == "AmmoPerMag" and 999 or 10,
+            Callback = function(value)
+                currentSettings[key] = value
+                applyGunSettings()
+            end
         })
     end
 end
 
-for key, val in pairs(currentSettings) do
-    GunModsSection:Slider({
-        Name = key,
-        Default = val,
-        Minimum = 0,
-        Maximum = key == "BaseDMG" and 500 or key == "Firerate" and 2000 or key == "AmmoPerMag" and 999 or 10,
-        Callback = function(value)
-            currentSettings[key] = value
-            applyGunSettings()
-        end
-    })
-end
+
 
