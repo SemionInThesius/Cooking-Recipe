@@ -45,6 +45,10 @@ local allowedUsers = {
     ["null"] = "null"
     ["null"] = "null"
     ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
+    ["null"] = "null"
 }
 
 -- 🎮 Oyun ID → Script URL
