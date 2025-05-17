@@ -37,18 +37,6 @@ local allowedUsers = {
     ["R4GE_SEV"] = "sev123",
     ["finnadestroyaboss"] = "imgayngl",
     ["augustosienna"] = "collin999"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
-    ["null"] = "null"
 }
 
 -- 🎮 Oyun ID → Script URL
