@@ -18,6 +18,8 @@ end)
 local LootContainers = workspace:WaitForChild("Game_Main"):WaitForChild("LootContainers")
 local validScrapItems = {"OilCar", "ScrapCar", "ExhaustCar", "RotOilCar"}
 
+
+
 -- UTILS
 local function enableNoclip()
 	for _, part in pairs(Character:GetDescendants()) do
@@ -36,8 +38,8 @@ end
 
 -- GUI
 local Window = MacLib:Window({
-	Title = "Wasteland Blues",
-	Subtitle = "Ultimate Scrap Autofarm & Combat",
+	Title = "Ugly's Wasteland",
+	Subtitle = "whoisthisugly",
 	Size = UDim2.fromOffset(850, 600),
 	DragStyle = 1,
 	ShowUserInfo = false,
@@ -73,8 +75,207 @@ local AutoFarmTab = TabGroup:Tab({ Name = "AutoFarm", Image = "rbxassetid://1882
 local GeneralTab = TabGroup:Tab({ Name = "General", Image = "rbxassetid://10734950309" })
 
 local AutoFarmSection = AutoFarmTab:Section({ Side = "Left" })
+
+local GunLootables = workspace:WaitForChild("Game_Main"):WaitForChild("GunLootables")
+local gunOptions = {}
+local selectedGun = nil
+
+
+local GunTpSection = AutoFarmTab:Section({ Side = "Right" })
+
+local function refreshGunDropdown()
+	local freshList = {}
+	for _, gun in ipairs(GunLootables:GetChildren()) do
+		local weapon = gun:FindFirstChild("AssignedWeapon")
+		local timer = gun:FindFirstChild("ItemLootTimer")
+		if weapon and not timer then
+			table.insert(freshList, weapon.Value)
+		end
+	end
+	if #freshList > 0 then
+		currentGunList = freshList
+		if gunDropdown then
+			gunDropdown:Destroy()  -- eski dropdown'u sil
+		end
+		gunDropdown = GunTpSection:Dropdown({
+			Name = "Available Guns",
+			Options = currentGunList,
+			Default = currentGunList[1],
+			Callback = function(selected)
+				selectedGun = selected
+			end
+		})
+	end
+end
+
+-- İlk başta oluştur
+refreshGunDropdown()
+
+-- Listeyi her 5 saniyede bir yenile
+task.spawn(function()
+	while true do
+		task.wait(5)
+		refreshGunDropdown()
+	end
+end)
+
+-- TP tuşu
+GunTpSection:Button({
+	Name = "📍 TP to Gun",
+	Callback = function()
+		for _, gun in ipairs(GunLootables:GetChildren()) do
+			local weapon = gun:FindFirstChild("AssignedWeapon")
+			local timer = gun:FindFirstChild("ItemLootTimer")
+			if weapon and weapon.Value == selectedGun and not timer then
+				local targetPart = gun:FindFirstChild("PrimaryPart") or gun:FindFirstChildWhichIsA("BasePart")
+				if targetPart then
+					Character:PivotTo(targetPart.CFrame + Vector3.new(0, 3, 0))
+					Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+					Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+					Window:Notify({
+						Title = "TP to Gun",
+						Description = "You were teleported to " .. selectedGun,
+						Lifetime = 2
+					})
+				end
+				break
+			end
+		end
+	end
+})
+
+RunService.Stepped:Connect(function()
+    updateGunList()
+end)
+
+
 local CombatSection = GeneralTab:Section({ Side = "Left" })
 local ESPSection = GeneralTab:Section({ Side = "Right" })
+
+local adminDetectionEnabled = false
+local adminAlertPlayed = {}
+
+-- Yeni ses (admin alarm)
+local AdminAlarmSound = Instance.new("Sound", workspace)
+AdminAlarmSound.SoundId = "rbxassetid://9062380528"
+AdminAlarmSound.Volume = 1
+AdminAlarmSound.Name = "AdminAlertSound"
+
+-- GUI: ADMIN DETECTED yazısı (ekranın üst kısmı)
+local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+screenGui.Name = "AdminWarningGui"
+screenGui.ResetOnSpawn = false
+screenGui.Enabled = false
+
+local warningText = Instance.new("TextLabel", screenGui)
+warningText.Size = UDim2.new(0.4, 0, 0.08, 0)
+warningText.Position = UDim2.new(0.3, 0, 0.1, 0)
+warningText.BackgroundTransparency = 1
+warningText.Text = "🚨 ADMIN DETECTED 🚨"
+warningText.TextColor3 = Color3.fromRGB(255, 0, 0)
+warningText.TextStrokeTransparency = 0.3
+warningText.Font = Enum.Font.GothamBlack
+warningText.TextScaled = true
+warningText.Visible = false
+
+-- ESP tagları
+local function markAdmin(player)
+	local char = player.Character
+	if not char then return end
+
+	if not char:FindFirstChild("AdminESP") then
+		-- Highlight
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "AdminESP"
+		highlight.FillColor = Color3.fromRGB(170, 0, 255)
+		highlight.OutlineColor = Color3.new(1, 1, 1)
+		highlight.OutlineTransparency = 0
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.Adornee = char
+		highlight.Parent = char
+	end
+
+	if char:FindFirstChild("Head") and not char:FindFirstChild("AdminBillboard") then
+		local bill = Instance.new("BillboardGui", char)
+		bill.Name = "AdminBillboard"
+		bill.Size = UDim2.new(0, 200, 0, 30)
+		bill.StudsOffset = Vector3.new(0, 4, 0)
+		bill.Adornee = char.Head
+		bill.AlwaysOnTop = true
+
+		local label = Instance.new("TextLabel", bill)
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundTransparency = 1
+		label.TextColor3 = Color3.fromRGB(255, 0, 255)
+		label.TextStrokeTransparency = 0.5
+		label.TextScaled = true
+
+		local dept = player:FindFirstChild("PlayerDepartments")
+		local role = dept and dept:FindFirstChild("[WB] Actors") and dept["[WB] Actors"]:FindFirstChild("Role")
+		label.Text = role and ("ADMIN: " .. role.Value) or "ADMIN"
+	end
+end
+
+-- ADMIN LOOP
+task.spawn(function()
+	while true do
+		if adminDetectionEnabled then
+			for _, player in pairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer and not adminAlertPlayed[player] then
+					local dept = player:FindFirstChild("PlayerDepartments")
+					if dept and dept:FindFirstChild("[WB] Actors") and dept["[WB] Actors"].Value == true then
+						local roleVal = dept["[WB] Actors"]:FindFirstChild("Role")
+						local roleText = roleVal and roleVal.Value or "Unknown Role"
+
+						-- ESP ve UI
+						markAdmin(player)
+
+						-- Bildirim
+						Window:Notify({
+							Title = "⚠️ ADMIN DETECTED",
+							Description = "👤 " .. player.Name .. "\n🎖️ Role: " .. roleText,
+							Lifetime = 5
+						})
+
+						-- Ses ve ekran uyarısı
+						AdminAlarmSound:Play()
+						warningText.Visible = true
+						screenGui.Enabled = true
+						task.delay(5, function()
+							warningText.Visible = false
+							screenGui.Enabled = false
+						end)
+
+						adminAlertPlayed[player] = true
+					end
+				end
+			end
+		end
+		task.wait(2)
+	end
+end)
+
+-- TOGGLE: ESP Paneline
+ESPSection:Toggle({
+	Name = "🚨 Admin Detection System",
+	Default = false,
+	Callback = function(state)
+		adminDetectionEnabled = state
+		if not state then
+			for _, player in pairs(Players:GetPlayers()) do
+				local char = player.Character
+				if char then
+					if char:FindFirstChild("AdminESP") then char.AdminESP:Destroy() end
+					if char:FindFirstChild("AdminBillboard") then char.AdminBillboard:Destroy() end
+				end
+			end
+			adminAlertPlayed = {}
+			warningText.Visible = false
+			screenGui.Enabled = false
+		end
+	end,
+})
+
 
 -- AIMBOT, SILENT AIM & ESP CONFIG
 local Holding = false
@@ -336,6 +537,107 @@ Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.RunningNoP
 	end,
 })
 
+-- FULL SCRIPT: WASTELAND BLUES - AUTO MAIL FARM MODULE
+-- Features: Mail Pickup, Mail Delivery, Camera Facing, Q/F Key Simulation
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Camera = workspace.CurrentCamera
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+-- SETTINGS
+local mailPickupPos = Vector3.new(-1584.816, 147.421, -2861.567)
+local mailDeliveryPos = Vector3.new(2523.644, 148.996, -4680.395)
+
+-- OBJECTS
+local mailmanPart = workspace:GetChildren()[1251]:FindFirstChild("TraderPart")
+local mailboxPart = workspace.PneumaMail_System.PneumaMail.Cylinder
+
+-- FUNCTIONS
+local function lookAt(target)
+    if target then
+        local camPos = Camera.CFrame.Position
+        Camera.CFrame = CFrame.new(camPos, target.Position)
+    end
+end
+
+local function holdKey(key, duration)
+    for _ = 1, duration * 10 do
+        VirtualInputManager:SendKeyEvent(true, key, false, game)
+        task.wait(0.1)
+    end
+    VirtualInputManager:SendKeyEvent(false, key, false, game)
+end
+
+local function hasPackage()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return false end
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name == "Package" then
+            return true
+        end
+    end
+    return false
+end
+
+local function tpLook(pos, target)
+    Character:PivotTo(CFrame.new(pos, target.Position))
+    Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+    lookAt(target)
+end
+
+local function deliverPackages()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return end
+
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name == "Package" then
+            Character:WaitForChild("Humanoid"):EquipTool(tool)
+            task.wait(0.3)
+            tpLook(mailDeliveryPos, mailboxPart)
+            task.wait(0.3)
+            holdKey(Enum.KeyCode.E, 0.1)
+            task.wait(0.5)
+        end
+    end
+end
+
+-- MAIN LOOP
+task.spawn(function()
+    while true do
+        if _G.AutoMailFarm then
+            if not hasPackage() then
+                tpLook(mailPickupPos, mailmanPart)
+                task.wait(0.5)
+                holdKey(Enum.KeyCode.Q, 3)
+            else
+                deliverPackages()
+                task.wait(1)
+                tpLook(mailPickupPos, mailmanPart)
+            end
+        end
+        task.wait(1.5)
+    end
+end)
+
+-- UI TOGGLE
+AutoFarmSection:Toggle({
+    Name = "📬 Auto Mail Farm",
+    Default = false,
+    Callback = function(state)
+        _G.AutoMailFarm = state
+        Window:Notify({
+            Title = "📦 Mail Delivery",
+            Description = state and "Auto Mail Activated" or "Auto Mail Deactivated",
+            Lifetime = 3
+        })
+    end
+})
+
+
 
 -- Max Weight
 AutoFarmSection:Button({
@@ -519,3 +821,47 @@ AutoFarmSection:Button({
 		print("✅ AutoSell executed")
 	end,
 })
+
+-- GUN MODS SECTION
+local GunModsSection = AutoFarmTab:Section({ Side = "Right" })
+local currentSettings = {
+    BaseDMG = 32,
+    Recoil = 0.9,
+    Firerate = 550,
+    AmmoPerMag = 16,
+    BulletSpread = 0.1,
+    DmgBoost = 1.05
+}
+
+local function applyGunSettings()
+    local tool = LocalPlayer.Backpack:FindFirstChild("Old World CR-1")
+    if tool and tool:FindFirstChild("SETTINGS") then
+        local settingsModule = require(tool.SETTINGS)
+        local settings = settingsModule.ReturnAllSettings()
+
+        for key, val in pairs(currentSettings) do
+            settings[key] = val
+        end
+
+        print("✅ Gun settings applied.")
+        Window:Notify({
+            Title = "Gun Mods",
+            Description = "Old World CR-1 updated.",
+            Lifetime = 3
+        })
+    end
+end
+
+for key, val in pairs(currentSettings) do
+    GunModsSection:Slider({
+        Name = key,
+        Default = val,
+        Minimum = 0,
+        Maximum = key == "BaseDMG" and 500 or key == "Firerate" and 2000 or key == "AmmoPerMag" and 999 or 10,
+        Callback = function(value)
+            currentSettings[key] = value
+            applyGunSettings()
+        end
+    })
+end
+
