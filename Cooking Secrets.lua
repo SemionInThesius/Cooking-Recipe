@@ -48,8 +48,14 @@ local allowedUsers = {
     ["NohzueioGG"] = "3169",
     ["mahmutunabisi0"] = "oetalat",
     ["bigboyisback3"] = "4gole",
-    ["mahmutunabisi0"] = "oetalat",
-    ["mahmutunabisi0"] = "oetalat",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
 }
 
 -- ✅ Oyun ID → Script URL ve isim eşleşmesi
