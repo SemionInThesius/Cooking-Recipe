@@ -4,7 +4,7 @@ local player = game.Players.LocalPlayer
 
 -- 🔐 Kullanıcı Adı → Key eşleşmeleri
 local allowedUsers = {
-    ["Ranviralt2"] = "admin",
+    ["FeFeALT24"] = "admin",
     ["pleasegimmeerwin"] = "stinkyfart32",
     ["cameronherbst"] = "Cam1226",
     ["Mahmutkrsgl"] = "1903",
