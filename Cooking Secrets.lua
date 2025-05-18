@@ -58,8 +58,8 @@ local allowedUsers = {
 -- 🎮 Oyun ID → Script URL eşleşmesi
 local scriptMap = {
     [13643807539] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
-    [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua"
-    [16472538603] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt"
+    [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua",
+    [16472538603] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
 
 }
 
