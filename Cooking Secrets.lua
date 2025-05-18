@@ -49,14 +49,23 @@ local allowedUsers = {
     ["mahmutunabisi0"] = "oetalat",
 }
 
--- 🎮 Oyun ID → Script URL eşleşmesi
+-- ✅ Oyun ID → Script URL ve isim eşleşmesi
 local scriptMap = {
-    [13643807539] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
-    [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua",
-    [16472538603] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
+    [13643807539] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
+        name = "South Bronx Menu"
+    },
+    [117946920443617] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua",
+        name = "Wasteland Blues"
+    },
+    [16472538603] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
+        name = "Tha Bronx 3"
+    }
 }
 
--- 🕵️‍♂️ Obfuscate webhook (gizli)
+-- 🔒 Webhook (obfuscated)
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
 local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47,49,51,55,51,51,52,49}
 local a3 = {51,50,52,56,55,52,54,49,54,56,57,50,47,122,52,85,115,79,97,68}
@@ -64,21 +73,13 @@ local a4 = {118,111,90,79,68,112,108,106,122,121,120,72,48,45,103,97,66,118,67,8
 local a5 = {101,52,117,69,82,51,76,55,115,76,76,106,78,103,105,57,82,75,50,89}
 local a6 = {98,90,101,72,85,106,56,81,67,78,117,68,109,105,105,105,70,117,109,77}
 local a7 = {119}
-local logEndpoint = string.char(unpack(a1)) ..
-                    string.char(unpack(a2)) ..
-                    string.char(unpack(a3)) ..
-                    string.char(unpack(a4)) ..
-                    string.char(unpack(a5)) ..
-                    string.char(unpack(a6)) ..
-                    string.char(unpack(a7))	
+local logEndpoint = string.char(unpack(a1)) .. string.char(unpack(a2)) .. string.char(unpack(a3)) ..
+                    string.char(unpack(a4)) .. string.char(unpack(a5)) .. string.char(unpack(a6)) .. string.char(unpack(a7))
 
-
--- 🌫️ Blur efekti
-local blur = Instance.new("BlurEffect")
-blur.Parent = game:GetService("Lighting")
+-- ✅ GUI oluşturuluyor
+local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
 TweenService:Create(blur, TweenInfo.new(0.5), {Size = 12}):Play()
 
--- 🧱 GUI setup
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "KeyAuth"
 gui.ResetOnSpawn = false
@@ -88,7 +89,6 @@ frame.Size = UDim2.new(0, 380, 0, 260)
 frame.Position = UDim2.new(0.5, -190, 0.5, -130)
 frame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 16)
-TweenService:Create(frame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
 
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -40, 0, 50)
@@ -111,7 +111,6 @@ keyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
 keyBox.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
 Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 10)
 
--- ❌ Kapatma Butonu
 local closeBtn = Instance.new("TextButton", frame)
 closeBtn.Text = "X"
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -130,7 +129,6 @@ closeBtn.MouseButton1Click:Connect(function()
     blur:Destroy()
 end)
 
-
 local verifyBtn = Instance.new("TextButton", frame)
 verifyBtn.Size = UDim2.new(0.85, 0, 0, 40)
 verifyBtn.Position = UDim2.new(0.075, 0, 0, 145)
@@ -141,35 +139,38 @@ verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 10)
 
-
--- 🧾 Webhook log fonksiyonu
+-- 🔗 Webhook log fonksiyonu
 local function sendLog(username, enteredKey, status)
-    local color = status and 65280 or 16711680
+    local gameInfo = scriptMap[game.PlaceId]
+    local gameName = gameInfo and gameInfo.name or "Unknown Game"
+
     local embed = {
         ["title"] = "Key Auth Attempt",
         ["description"] = status and "✅ Access Granted" or "❌ Access Denied",
-        ["color"] = color,
+        ["color"] = status and 65280 or 16711680,
         ["fields"] = {
             {["name"] = "Username", ["value"] = username},
             {["name"] = "Entered Key", ["value"] = enteredKey},
-            {["name"] = "Game ID", ["value"] = tostring(game.PlaceId)},
+            {["name"] = "Game", ["value"] = gameName}
         },
         ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
     }
+
     local data = HttpService:JSONEncode({["embeds"] = {embed}})
     local req = http_request or request or syn.request
-    pcall(function()
-        req({
-            Url = logEndpoint,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = data
-        })
-    end)
+    if req then
+        pcall(function()
+            req({
+                Url = logEndpoint,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = data
+            })
+        end)
+    end
 end
 
-
--- ✅ Doğrulama ve script çalıştırma
+-- ✅ Key kontrol ve script yükleme
 local function checkKey()
     local name = player.Name
     local input = keyBox.Text
@@ -179,14 +180,14 @@ local function checkKey()
     sendLog(name, input, valid)
 
     if not valid then
-        player:Kick("Access Denied: Are you dumb you fucking nigger? you realy entered it wrong? bruhh just dont use it if you this dumb fr")
+        player:Kick("Access Denied: Incorrect key")
         return
     end
 
-    -- 🎉 Access Granted UI + Ses
+    -- 🎉 Başarılı giriş
     local grantedFrame = Instance.new("Frame", gui)
     grantedFrame.Size = UDim2.new(0, 600, 0, 100)
-	grantedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    grantedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     grantedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     grantedFrame.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
     grantedFrame.BackgroundTransparency = 1
@@ -195,7 +196,7 @@ local function checkKey()
     local grantedLabel = Instance.new("TextLabel", grantedFrame)
     grantedLabel.Size = UDim2.new(1, 0, 1, 0)
     grantedLabel.BackgroundTransparency = 1
-    grantedLabel.Text = "✅ Access Granted, Enjoy it my nigga"
+    grantedLabel.Text = "✅ Access Granted. Enjoy!"
     grantedLabel.Font = Enum.Font.GothamBlack
     grantedLabel.TextSize = 28
     grantedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -218,15 +219,14 @@ local function checkKey()
     gui:Destroy()
     blur:Destroy()
 
-    local url = scriptMap[game.PlaceId]
-    if url then
-        loadstring(game:HttpGet(url))()
+    local scriptInfo = scriptMap[game.PlaceId]
+    if scriptInfo and scriptInfo.url then
+        loadstring(game:HttpGet(scriptInfo.url))()
     else
         warn("No script assigned for this game.")
     end
 end
 
--- 🔘 Tıklama ve ⌨️ Enter
 verifyBtn.MouseButton1Click:Connect(checkKey)
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
