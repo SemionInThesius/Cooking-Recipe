@@ -47,6 +47,9 @@ local allowedUsers = {
     ["CrystalGh0stNinja"] = "Hello123",
     ["NohzueioGG"] = "3169",
     ["mahmutunabisi0"] = "oetalat",
+    ["bigboyisback3"] = "4gole",
+    ["mahmutunabisi0"] = "oetalat",
+    ["mahmutunabisi0"] = "oetalat",
 }
 
 -- ✅ Oyun ID → Script URL ve isim eşleşmesi
