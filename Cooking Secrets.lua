@@ -74,7 +74,7 @@ local scriptMap = {
     }
 }
 
--- 🔒 Webhook (obfuscated)
+-- 🔒
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
 local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47,49,51,55,51,51,52,49}
 local a3 = {51,50,52,56,55,52,54,49,54,56,57,50,47,122,52,85,115,79,97,68}
@@ -148,7 +148,7 @@ verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 10)
 
--- 🔗 Webhook log fonksiyonu
+-- 🔗 log fonksiyonu
 local function sendLog(username, enteredKey, status)
     local gameInfo = scriptMap[game.PlaceId]
     local gameName = gameInfo and gameInfo.name or "Unknown Game"
