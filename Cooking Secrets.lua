@@ -189,7 +189,7 @@ local function checkKey()
     sendLog(name, input, valid)
 
     if not valid then
-        player:Kick("Access Denied: Incorrect key")
+        player:Kick("Access Denied: Are you dumb you fucking nigger? you realy entered it wrong? bruhh just dont use it if you this dumb fr")
         return
     end
 
