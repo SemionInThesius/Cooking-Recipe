@@ -47,12 +47,6 @@ local allowedUsers = {
     ["CrystalGh0stNinja"] = "Hello123",
     ["NohzueioGG"] = "3169",
     ["mahmutunabisi0"] = "oetalat",
-    ["thegodofwarplaying"] = "oeizzet",
-    ["bigboyisback3"] = "4golem",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
 }
 
 -- 🎮 Oyun ID → Script URL eşleşmesi
@@ -60,10 +54,9 @@ local scriptMap = {
     [13643807539] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
     [117946920443617] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua",
     [16472538603] = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
-
 }
 
-
+-- 🕵️‍♂️ Obfuscate webhook (gizli)
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
 local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47,49,51,55,51,51,52,49}
 local a3 = {51,50,52,56,55,52,54,49,54,56,57,50,47,122,52,85,115,79,97,68}
@@ -71,16 +64,13 @@ local a4 = {118,111,90,79,68,112,108,106,122,121,120,72,48,45,103,97,66,118,67,8
 local a5 = {101,52,117,69,82,51,76,55,115,76,76,106,78,103,105,57,82,75,50,89}
 local a6 = {98,90,101,72,85,106,56,81,67,78,117,68,109,105,105,105,70,117,109,77}
 local a7 = {119}
-
-
 local logEndpoint = string.char(unpack(a1)) ..
                     string.char(unpack(a2)) ..
                     string.char(unpack(a3)) ..
                     string.char(unpack(a4)) ..
                     string.char(unpack(a5)) ..
                     string.char(unpack(a6)) ..
-                    string.char(unpack(a7))
-
+                    string.char(unpack(a7))	
 
 
 -- 🌫️ Blur efekti
@@ -152,6 +142,7 @@ verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 10)
 
 
+-- 🧾 Webhook log fonksiyonu
 local function sendLog(username, enteredKey, status)
     local color = status and 65280 or 16711680
     local embed = {
@@ -169,13 +160,14 @@ local function sendLog(username, enteredKey, status)
     local req = http_request or request or syn.request
     pcall(function()
         req({
-            Url = webhookURL,
+            Url = logEndpoint,
             Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
             Body = data
         })
     end)
 end
+
 
 -- ✅ Doğrulama ve script çalıştırma
 local function checkKey()
