@@ -53,7 +53,7 @@ local allowedUsers = {
     ["GLXKBXYZXY"] = "lean223",  --997692284076306494
     ["thegodofwarplaying"] = "oeizzet",  --953702830018007080
     ["Diablosthorns"] = "792679915",
-    ["null"] = "null",
+    ["EBKboiSeba"] = "EBK1234",
     ["null"] = "null",
     ["null"] = "null",
 }
