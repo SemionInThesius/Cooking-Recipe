@@ -58,7 +58,7 @@ local allowedUsers = {
     ["endinakodulaze9"] = "imthebest123",
     ["LoneInTheDarKeN"] = "money444",  --1260109267558727727
     ["gamergirl12378"] = "1252887J@1",
-    ["null"] = "null",
+    ["OnLvrry"] = "Jack04!",
     ["null"] = "null",
     ["null"] = "null",
     ["null"] = "null",
@@ -68,6 +68,10 @@ local allowedUsers = {
     ["null"] = "null",
     ["null"] = "null",
 }
+
+-- 🌐 Herkese açık ortak key
+local universalKey = "freeminium"
+
 
 -- ✅ Oyun ID → Script URL ve isim eşleşmesi
 local scriptMap = {
@@ -195,12 +199,18 @@ local function checkKey()
     local name = player.Name
     local input = keyBox.Text
     local correct = allowedUsers[name]
-    local valid = (input == correct)
+
+    local valid = false
+    if correct then
+        valid = (input == correct)
+    else
+        valid = (input == universalKey)
+    end
 
     sendLog(name, input, valid)
 
     if not valid then
-        player:Kick("Access Denied: Are you dumb you fucking nigger? you realy entered it wrong? bruhh just dont use it if you this dumb fr")
+        -- Artık kickleme yok
         return
     end
 
