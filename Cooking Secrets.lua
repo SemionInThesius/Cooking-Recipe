@@ -15,6 +15,7 @@ local allowedUsers = {
     ["augustosienna"] = "admin",
 }
 
+-- 🎯 Script Map
 local scriptMap = {
     [13643807539] = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
@@ -33,21 +34,35 @@ local scriptMap = {
 local universalKey = "uglyisbest"
 local expiredKey = "freeminium"
 
--- 🌐 Webhook
-local endpoint = "https://discord.com/api/webhooks/1373341..."
+-- 🌐 Webhook (obfuscated)
+local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
+local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47}
+local a3 = {49,51,55,49,50,52,53,52,51,52,52,55,57,51,49,54,57,57,51}
+local a4 = {47,51,106,102,57,48,121,51,72,107,97,65,111,78,86,52,83,117,122,69}
+local a5 = {116,90,67,79,84,56,51,54,115,106,48,80,117,109,98,106,115,54,89,74}
+local a6 = {88,80,88,54,116,56,119,79,77,118,95,53,67,85,84,110,102,80,52,77}
+local a7 = {72,68,71,50,45,52,103,118,98}
 
--- 🎵 GUI + Müzik + Blur
+local endpoint = string.char(unpack(a1)) .. string.char(unpack(a2)) ..
+                 string.char(unpack(a3)) .. string.char(unpack(a4)) ..
+                 string.char(unpack(a5)) .. string.char(unpack(a6)) ..
+                 string.char(unpack(a7))
+
+-- 🌫️ Blur + GUI + Music
 local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
 TweenService:Create(blur, TweenInfo.new(0.5), {Size = 12}):Play()
 
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "KeyAuth"
+gui.ResetOnSpawn = false
+
 local music = Instance.new("Sound", gui)
 music.SoundId = "rbxassetid://1845444990"
 music.Looped = true
 music.Volume = 0.3
 music:Play()
 
--- 🎛️ Frame
+-- 🖼️ Main Frame
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 420, 0, 300)
 frame.Position = UDim2.new(0.5, -210, 0.5, -150)
@@ -85,7 +100,7 @@ muteBtn.MouseButton1Click:Connect(function()
     muteBtn.Text = music.Playing and "🔊" or "🔇"
 end)
 
--- 🏷️ Title + Gradient + Wave
+-- 🏷️ Title + Shimmer + Wave
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -40, 0, 50)
 title.Position = UDim2.new(0, 20, 0, 10)
@@ -104,8 +119,6 @@ shimmer.Color = ColorSequence.new{
 }
 
 local originalPos = title.Position
-
--- Wave animasyonu
 spawn(function()
     while title and title.Parent do
         TweenService:Create(title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
@@ -136,13 +149,20 @@ for i = 1, 24 do
     end)
 end
 
--- 📤 Log
-local function sendLog(name, input, status)
+-- 📤 Log Function
+local function sendLog(name, input, valid, isExpired)
+    local desc, color = "❌ Access Denied", 16711680
+    if isExpired then
+        desc, color = "⚠️ Expired Key", 16753920
+    elseif valid then
+        desc, color = "✅ Access Granted", 65280
+    end
+
     local data = HttpService:JSONEncode({
         embeds = {{
             title = "Key Auth Attempt",
-            description = status and "✅ Access Granted" or "❌ Access Denied",
-            color = status and 65280 or 16711680,
+            description = desc,
+            color = color,
             fields = {
                 {name = "Username", value = name},
                 {name = "Entered Key", value = input},
@@ -151,6 +171,7 @@ local function sendLog(name, input, status)
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
     })
+
     local req = http_request or request or syn.request
     if req then
         pcall(function()
@@ -164,7 +185,7 @@ local function sendLog(name, input, status)
     end
 end
 
--- 🎤 Feedback
+-- 🎤 Feedback Message
 local function feedback(text, color)
     local box = Instance.new("Frame", gui)
     box.Size = UDim2.new(0, 360, 0, 50)
@@ -195,7 +216,7 @@ local function feedback(text, color)
     sound:Destroy()
 end
 
--- 🔐 Key Input
+-- 🔐 Key Input & Button
 local keyBox = Instance.new("TextBox", frame)
 keyBox.Size = UDim2.new(0.85, 0, 0, 45)
 keyBox.Position = UDim2.new(0.075, 0, 0, 90)
@@ -217,7 +238,7 @@ verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 10)
 
--- ✔️ Doğrulama
+-- ✔️ Key Check Logic
 local function checkKey()
     local name = player.Name
     local input = keyBox.Text
@@ -233,14 +254,14 @@ local function checkKey()
         isExpired = true
     end
 
-    sendLog(name, input, valid and not isExpired)
+    sendLog(name, input, valid, isExpired)
 
     if isExpired then
-        return feedback("⚠️ This key has expired. Please get a new one.", Color3.fromRGB(255, 200, 0))
+        return feedback("⚠️ This key expired. Get a new one nigga", Color3.fromRGB(255, 200, 0))
     end
 
     if valid then
-        feedback("✅ Access Granted. Welcome!", Color3.fromRGB(0, 200, 0))
+        feedback("✅ Access Granted. Enjoy my nigga!", Color3.fromRGB(0, 200, 0))
         task.wait(0.5)
         gui:Destroy()
         blur:Destroy()
@@ -249,7 +270,7 @@ local function checkKey()
             loadstring(game:HttpGet(s.url))()
         end
     else
-        feedback("❌ Access Denied. Wrong key!", Color3.fromRGB(200, 0, 0))
+        feedback("❌ Access Denied. Wrong key nigga!", Color3.fromRGB(200, 0, 0))
     end
 end
 
