@@ -4,73 +4,19 @@ local player = game.Players.LocalPlayer
 
 -- 🔐 Kullanıcı Adı → Key eşleşmeleri
 local allowedUsers = {
-    ["FeFeALT24"] = "admin",
-    ["pleasegimmeerwin"] = "stinkyfart32",
-    ["cameronherbst"] = "Cam1226",
-    ["Mahmutkrsgl"] = "1903",
-    ["Mercy_emo"] = "1904",
-    ["asyakrsgl"] = "1905",
     ["evlpne"] = "chickenfart234",
     ["hsyweei12345"] = "0107",
     ["Vofzzz"] = "Dominicano",
     ["gocrazyjay0"] = "Jordan21",
     ["KronicIz"] = "Mcboss413",
     ["zxytoxd"] = "oompaloompa",
-    ["SebastianDuckMaster"] = "oompaloompa",
-    ["BrooklynHaze12"] = "Poppaishere",
-    ["WolfRavenLucky"] = "UncleTayy",
-    ["Lebronjammes38"] = "lebronking33",
-    ["benn_kaz"] = "sikicikanye",
-    ["2xclusive_Tay"] = "Tayysob",
-    ["leshenhazretleri"] = "1900",
-    ["rjames1001"] = "Cam1563",
-    ["MikaSwungU"] = "J@thegoat1",
-    ["StopAimingOnAltz233"] = "collin453",
-    ["kooldboys3"] = "UncleTayy",
-    ["Kappadotty"] = "jjsploitisgreat",
-    ["g8pvlbpzgiu9hc8mclv6"] = "keel",
-    ["Camehgghgggf"] = "Jake1226",
-    ["Leroy_980"] = "imthebest",
-    ["Stealth_Omega2008"] = "TO6789",
-    ["lerro700"] = "12345678",
-    ["leroynot2krazy"] = "Thisistooez",
-    ["R4GE_SEV"] = "sev123",
-    ["finnadestroyaboss"] = "imgayngl",
-    ["augustosienna"] = "collin999",
-    ["XxSebastianMaxxX2017"] = "loompa",
-    ["saulc_bestnewacc"] = "District",
-    ["Saulc_bestalt3"] = "District12",
-    ["CommandroOps"] = "COMO293",
-    ["jenso1234xx"] = "jinx1234109",
-    ["Addis0nN3xus47"] = "collin900",
-    ["bob0000000000000"] = "1252887J@",
-    ["CrystalGh0stNinja"] = "Hello123",
-    ["null"] = "null",
-    ["mahmutunabisi0"] = "oetalat",  --953702830018007080
-    ["bigboyisback3"] = "4golem",  --1369703069050474548
-    ["Iloveinlovewithlily"] = "rivalspro",  --1372295887816102020
-    ["socialy_anti21"] = "Actavis21",  --1156290546701189203
-    ["GLXKBXYZXY"] = "lean223",  --997692284076306494
-    ["babasarkiyapti5"] = "oeşadiye",  --953702830018007080
-    ["Diablosthorns"] = "792679915",  --1351625621067010108
-    ["EBKboiSeba"] = "EBK1234",  --1131696075481300993
-    ["yokim9792"] = "emfod",  --1374013489688875121
-    ["endinakodulaze9"] = "imthebest123",
-    ["LoneInTheDarKeN"] = "money444",  --1260109267558727727
-    ["gamergirl12378"] = "1252887J@1",
-    ["OnLvrry"] = "Jack04!",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
-    ["null"] = "null",
+  
 }
 
 -- 🌐 Herkese açık ortak key
 local universalKey = "freeminium"
+local expiredKey = "expired123" -- sarı uyarı mesajı için özel key
+
 
 
 -- ✅ Oyun ID → Script URL ve isim eşleşmesi
@@ -194,69 +140,144 @@ local function sendLog(username, enteredKey, status)
     end
 end
 
--- ✅ Key kontrol ve script yükleme
+
+-- Key kontrol ve script yükleme
+local deniedMessages = {
+    "❌ Access Denied. Try again.",
+    "❌ Incorrect key, please retry.",
+    "🚫 Nope. Wrong key.",
+    "🔒 That didn’t work!",
+    "😕 Still locked. Wrong key!"
+}
+
+-- 🔽 Bu kısım fonksiyonun altına gelmeli
+
 local function checkKey()
     local name = player.Name
     local input = keyBox.Text
     local correct = allowedUsers[name]
 
     local valid = false
+    local isExpired = false
+
     if correct then
         valid = (input == correct)
-    else
-        valid = (input == universalKey)
+    elseif input == universalKey then
+        valid = true
+    elseif input == expiredKey then
+        isExpired = true
     end
 
-    sendLog(name, input, valid)
+    sendLog(name, input, valid and not isExpired)
 
-    if not valid then
-        -- Artık kickleme yok
+    if isExpired then
+        -- ⚠️ Süresi dolmuş key girişi
+        local expiredFrame = Instance.new("Frame", gui)
+        expiredFrame.Size = UDim2.new(0, 600, 0, 100)
+        expiredFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        expiredFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        expiredFrame.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+        expiredFrame.BackgroundTransparency = 1
+        Instance.new("UICorner", expiredFrame).CornerRadius = UDim.new(0, 10)
+
+        local expiredLabel = Instance.new("TextLabel", expiredFrame)
+        expiredLabel.Size = UDim2.new(1, 0, 1, 0)
+        expiredLabel.BackgroundTransparency = 1
+        expiredLabel.Text = "⚠️ This key has timed out, get a new one."
+        expiredLabel.Font = Enum.Font.GothamBlack
+        expiredLabel.TextSize = 26
+        expiredLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+
+        local sound = Instance.new("Sound", gui)
+        sound.SoundId = "rbxassetid://138098863"
+        sound.Volume = 1
+        sound:Play()
+
+        TweenService:Create(expiredFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
+        task.wait(2)
+        TweenService:Create(expiredFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        task.wait(0.4)
+        expiredFrame:Destroy()
+        sound:Destroy()
+
         return
     end
 
-    -- 🎉 Başarılı giriş
-    local grantedFrame = Instance.new("Frame", gui)
-    grantedFrame.Size = UDim2.new(0, 600, 0, 100)
-    grantedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    grantedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    grantedFrame.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-    grantedFrame.BackgroundTransparency = 1
-    Instance.new("UICorner", grantedFrame).CornerRadius = UDim.new(0, 10)
+    if valid then
+        -- ✅ Başarılı Giriş
+        local grantedFrame = Instance.new("Frame", gui)
+        grantedFrame.Size = UDim2.new(0, 600, 0, 100)
+        grantedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        grantedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        grantedFrame.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        grantedFrame.BackgroundTransparency = 1
+        Instance.new("UICorner", grantedFrame).CornerRadius = UDim.new(0, 10)
 
-    local grantedLabel = Instance.new("TextLabel", grantedFrame)
-    grantedLabel.Size = UDim2.new(1, 0, 1, 0)
-    grantedLabel.BackgroundTransparency = 1
-    grantedLabel.Text = "✅ Access Granted. Enjoy!"
-    grantedLabel.Font = Enum.Font.GothamBlack
-    grantedLabel.TextSize = 28
-    grantedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        local grantedLabel = Instance.new("TextLabel", grantedFrame)
+        grantedLabel.Size = UDim2.new(1, 0, 1, 0)
+        grantedLabel.BackgroundTransparency = 1
+        grantedLabel.Text = "✅ Access Granted. Welcome!"
+        grantedLabel.Font = Enum.Font.GothamBlack
+        grantedLabel.TextSize = 28
+        grantedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    local sound = Instance.new("Sound", gui)
-    sound.SoundId = "rbxassetid://237877850"
-    sound.Volume = 1
-    sound:Play()
+        local sound = Instance.new("Sound", gui)
+        sound.SoundId = "rbxassetid://237877850"
+        sound.Volume = 1
+        sound:Play()
 
-    TweenService:Create(grantedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
-    task.wait(2)
-    TweenService:Create(grantedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-    task.wait(0.4)
-    grantedFrame:Destroy()
-    sound:Destroy()
+        TweenService:Create(grantedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
+        task.wait(2)
+        TweenService:Create(grantedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        task.wait(0.4)
+        grantedFrame:Destroy()
+        sound:Destroy()
 
-    TweenService:Create(frame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play()
-    task.wait(0.5)
-    gui:Destroy()
-    blur:Destroy()
+        TweenService:Create(frame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play()
+        task.wait(0.5)
+        gui:Destroy()
+        blur:Destroy()
 
-    local scriptInfo = scriptMap[game.PlaceId]
-    if scriptInfo and scriptInfo.url then
-        loadstring(game:HttpGet(scriptInfo.url))()
+        local scriptInfo = scriptMap[game.PlaceId]
+        if scriptInfo and scriptInfo.url then
+            loadstring(game:HttpGet(scriptInfo.url))()
+        else
+            warn("No script assigned for this game.")
+        end
     else
-        warn("No script assigned for this game.")
+        -- ❌ Başarısız Giriş
+        local deniedFrame = Instance.new("Frame", gui)
+        deniedFrame.Size = UDim2.new(0, 600, 0, 100)
+        deniedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        deniedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        deniedFrame.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+        deniedFrame.BackgroundTransparency = 1
+        Instance.new("UICorner", deniedFrame).CornerRadius = UDim.new(0, 10)
+
+        local deniedLabel = Instance.new("TextLabel", deniedFrame)
+        deniedLabel.Size = UDim2.new(1, 0, 1, 0)
+        deniedLabel.BackgroundTransparency = 1
+        deniedLabel.Text = deniedMessages[math.random(1, #deniedMessages)]
+        deniedLabel.Font = Enum.Font.GothamBlack
+        deniedLabel.TextSize = 26
+        deniedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+        local sound = Instance.new("Sound", gui)
+        sound.SoundId = "rbxassetid://138098863"
+        sound.Volume = 1
+        sound:Play()
+
+        TweenService:Create(deniedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
+        task.wait(2)
+        TweenService:Create(deniedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        task.wait(0.4)
+        deniedFrame:Destroy()
+        sound:Destroy()
     end
 end
 
+-- 🔘 Butonlara bağlanması
 verifyBtn.MouseButton1Click:Connect(checkKey)
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
