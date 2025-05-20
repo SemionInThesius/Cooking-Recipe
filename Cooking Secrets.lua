@@ -104,7 +104,7 @@ end)
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -40, 0, 50)
 title.Position = UDim2.new(0, 20, 0, 10)
-title.Text = "🔐 Secure Key Verification"
+title.Text = "🔐 Ugly's Key Verification"
 title.Font = Enum.Font.FredokaOne
 title.TextSize = 26
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
