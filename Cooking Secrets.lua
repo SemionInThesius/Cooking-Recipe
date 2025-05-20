@@ -1,8 +1,9 @@
+-- ✅ Services
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local player = game.Players.LocalPlayer
 
--- 🔐 Kullanıcı Adı → Key eşleşmeleri
+-- 🔐 Key eşleşmeleri
 local allowedUsers = {
     ["evlpne"] = "chickenfart234",
     ["hsyweei12345"] = "0107",
@@ -10,129 +11,207 @@ local allowedUsers = {
     ["gocrazyjay0"] = "Jordan21",
     ["KronicIz"] = "Mcboss413",
     ["zxytoxd"] = "oompaloompa",
-    ["liesmokey"] = "liesmokey12",
-  
 }
 
--- 🌐 Herkese açık ortak key
-local universalKey = "freeminium"
-local expiredKey = "expired123" -- sarı uyarı mesajı için özel key
+local universalKey = "uglyisbest"
+local expiredKey = "freeminium"
 
-
-
--- ✅ Oyun ID → Script URL ve isim eşleşmesi
-local scriptMap = {
-    [13643807539] = {
-        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
-        name = "South Bronx Menu"
-    },
-    [117946920443617] = {
-        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua",
-        name = "Wasteland Blues"
-    },
-    [16472538603] = {
-        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
-        name = "Tha Bronx 3"
-    }
-}
-
--- 🔒
-local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
-local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47,49,51,55,51,51,52,49}
-local a3 = {51,50,52,56,55,52,54,49,54,56,57,50,47,122,52,85,115,79,97,68}
-local a4 = {118,111,90,79,68,112,108,106,122,121,120,72,48,45,103,97,66,118,67,89}
-local a5 = {101,52,117,69,82,51,76,55,115,76,76,106,78,103,105,57,82,75,50,89}
-local a6 = {98,90,101,72,85,106,56,81,67,78,117,68,109,105,105,105,70,117,109,77}
-local a7 = {119}
-local logEndpoint = string.char(unpack(a1)) .. string.char(unpack(a2)) .. string.char(unpack(a3)) ..
-                    string.char(unpack(a4)) .. string.char(unpack(a5)) .. string.char(unpack(a6)) .. string.char(unpack(a7))
-
--- ✅ GUI oluşturuluyor
+-- 🎵 Background music
 local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
+blur.Size = 0
+blur.Parent = game:GetService("Lighting")
 TweenService:Create(blur, TweenInfo.new(0.5), {Size = 12}):Play()
 
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "KeyAuth"
 gui.ResetOnSpawn = false
 
+local music = Instance.new("Sound", gui)
+music.SoundId = "rbxassetid://1845444990"
+music.Looped = true
+music.Volume = 0.3
+music:Play()
+
+-- 🌐 Webhook endpoint
+local endpoint = "https://discord.com/api/webhooks/1373341..."
+-- Sadece örnek satır; yukarıda olduğu gibi obfuscate edebilirsin
+
+-- 🎛️ Frame
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 380, 0, 260)
-frame.Position = UDim2.new(0.5, -190, 0.5, -130)
-frame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 16)
+frame.Size = UDim2.new(0, 420, 0, 300)
+frame.Position = UDim2.new(0.5, -210, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundTransparency = 0.1
+frame.BorderSizePixel = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, -40, 0, 50)
-title.Position = UDim2.new(0, 20, 0, 10)
-title.Text = "🔐 Key Verification"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 22
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.BackgroundTransparency = 1
-title.TextXAlignment = Enum.TextXAlignment.Left
-
-local keyBox = Instance.new("TextBox", frame)
-keyBox.Size = UDim2.new(0.85, 0, 0, 40)
-keyBox.Position = UDim2.new(0.075, 0, 0, 80)
-keyBox.PlaceholderText = "Enter your access key..."
-keyBox.TextInputType = Enum.TextInputType.Password
-keyBox.Font = Enum.Font.Gotham
-keyBox.TextSize = 18
-keyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-keyBox.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
-Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 10)
-
+-- ❌ Close button
 local closeBtn = Instance.new("TextButton", frame)
-closeBtn.Text = "X"
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
 closeBtn.Position = UDim2.new(1, -35, 0, 10)
+closeBtn.Text = "✖"
+closeBtn.Font = Enum.Font.FredokaOne
+closeBtn.TextSize = 20
 closeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 20
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
-
 closeBtn.MouseButton1Click:Connect(function()
-    TweenService:Create(frame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(blur, TweenInfo.new(0.3), {Size = 0}):Play()
-    task.wait(0.3)
     gui:Destroy()
     blur:Destroy()
 end)
 
+-- 🔇 Music toggle
+local muteBtn = Instance.new("TextButton", frame)
+muteBtn.Size = UDim2.new(0, 30, 0, 30)
+muteBtn.Position = UDim2.new(1, -35, 0, 45)
+muteBtn.Text = "🔊"
+muteBtn.Font = Enum.Font.FredokaOne
+muteBtn.TextSize = 20
+muteBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+muteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", muteBtn).CornerRadius = UDim.new(0, 6)
+muteBtn.MouseButton1Click:Connect(function()
+    music.Playing = not music.Playing
+    muteBtn.Text = music.Playing and "🔊" or "🔇"
+end)
+
+-- 🏷️ Title
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -40, 0, 50)
+title.Position = UDim2.new(0, 20, 0, 10)
+title.Text = "🔐 Secure Key Verification"
+title.Font = Enum.Font.FredokaOne
+title.TextSize = 26
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ✨ Shimmer gradient efekt (renk geçişi)
+local shimmer = Instance.new("UIGradient", title)
+shimmer.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,255,255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,170,255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255)),
+}
+shimmer.Rotation = 0
+
+task.spawn(function()
+    while shimmer and shimmer.Parent do
+        for i = 0, 360, 2 do
+            shimmer.Rotation = i
+            task.wait(0.02)
+        end
+    end
+end)
+
+-- 🌊 Yukarı-aşağı “wave” efekti için metin hareketi
+local originalPos = title.Position
+task.spawn(function()
+    while title and title.Parent do
+        TweenService:Create(title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Position = originalPos + UDim2.new(0, 0, 0, -3)
+        }):Play()
+        task.wait(0.8)
+        TweenService:Create(title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Position = originalPos + UDim2.new(0, 0, 0, 3)
+        }):Play()
+        task.wait(0.8)
+    end
+end)
+
+
+-- 🧾 Key Box
+local keyBox = Instance.new("TextBox", frame)
+keyBox.Size = UDim2.new(0.85, 0, 0, 45)
+keyBox.Position = UDim2.new(0.075, 0, 0, 90)
+keyBox.PlaceholderText = "🔑 Enter your key..."
+keyBox.TextInputType = Enum.TextInputType.Password
+keyBox.Font = Enum.Font.FredokaOne
+keyBox.TextSize = 20
+keyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+keyBox.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 10)
+
+-- ✅ Verify button
 local verifyBtn = Instance.new("TextButton", frame)
-verifyBtn.Size = UDim2.new(0.85, 0, 0, 40)
-verifyBtn.Position = UDim2.new(0.075, 0, 0, 145)
-verifyBtn.Text = "Verify Key"
-verifyBtn.Font = Enum.Font.GothamBold
-verifyBtn.TextSize = 20
+verifyBtn.Size = UDim2.new(0.85, 0, 0, 42)
+verifyBtn.Position = UDim2.new(0.075, 0, 0, 150)
+verifyBtn.Text = "🔍 Verify Key"
+verifyBtn.Font = Enum.Font.FredokaOne
+verifyBtn.TextSize = 22
 verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 10)
 
--- 🔗 log fonksiyonu
-local function sendLog(username, enteredKey, status)
-    local gameInfo = scriptMap[game.PlaceId]
-    local gameName = gameInfo and gameInfo.name or "Unknown Game"
+-- 📶 Visualizer (dancing bars)
+for i = 1, 24 do
+    local bar = Instance.new("Frame", frame)
+    bar.Size = UDim2.new(0, 6, 0, math.random(10, 40))
+    bar.Position = UDim2.new(0, 50 + (i * 13), 0, 275) -- ← Burayı değiştirdik: x +20, y 230
+    bar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    bar.BorderSizePixel = 0
+    bar.AnchorPoint = Vector2.new(0.5, 1)
+    Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 2)
+    task.spawn(function()
+        while gui and gui.Parent do
+            TweenService:Create(bar, TweenInfo.new(0.25), {Size = UDim2.new(0, 6, 0, math.random(10, 50))}):Play()
+            task.wait(0.2)
+        end
+    end)
+end
 
-    local embed = {
-        ["title"] = "Key Auth Attempt",
-        ["description"] = status and "✅ Access Granted" or "❌ Access Denied",
-        ["color"] = status and 65280 or 16711680,
-        ["fields"] = {
-            {["name"] = "Username", ["value"] = username},
-            {["name"] = "Entered Key", ["value"] = enteredKey},
-            {["name"] = "Game", ["value"] = gameName}
-        },
-        ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
-    }
 
-    local data = HttpService:JSONEncode({["embeds"] = {embed}})
+-- 🎤 Feedback messages
+local function feedback(text, color)
+    local box = Instance.new("Frame", gui)
+    box.Size = UDim2.new(0, 360, 0, 50)
+    box.AnchorPoint = Vector2.new(0.5, 0.5)
+    box.Position = UDim2.new(0.5, 0, 0.78, 0)
+    box.BackgroundColor3 = color
+    box.BackgroundTransparency = 1
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
+
+    local label = Instance.new("TextLabel", box)
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.Text = text
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Font = Enum.Font.FredokaOne
+    label.TextSize = 22
+    label.BackgroundTransparency = 1
+
+    local sound = Instance.new("Sound", gui)
+    sound.SoundId = "rbxassetid://3774415505"
+    sound.Volume = 1
+    sound:Play()
+
+    TweenService:Create(box, TweenInfo.new(0.3), {BackgroundTransparency = 0.05}):Play()
+    task.wait(2)
+    TweenService:Create(box, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+    task.wait(0.3)
+    box:Destroy()
+    sound:Destroy()
+end
+
+-- 📤 Webhook log
+local function sendLog(name, input, status)
+    local data = HttpService:JSONEncode({
+        embeds = {{
+            title = "Key Auth Attempt",
+            description = status and "✅ Access Granted" or "❌ Access Denied",
+            color = status and 65280 or 16711680,
+            fields = {
+                {name = "Username", value = name},
+                {name = "Entered Key", value = input},
+                {name = "Game", value = game.PlaceId}
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    })
     local req = http_request or request or syn.request
     if req then
         pcall(function()
             req({
-                Url = logEndpoint,
+                Url = endpoint,
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
                 Body = data
@@ -141,28 +220,16 @@ local function sendLog(username, enteredKey, status)
     end
 end
 
-
--- Key kontrol ve script yükleme
-local deniedMessages = {
-    "❌ Access Denied. Try again.",
-    "❌ Incorrect key, please retry.",
-    "🚫 Nope. Wrong key.",
-    "🔒 That didn’t work!",
-    "😕 Still locked. Wrong key!"
-}
-
--- 🔽 Bu kısım fonksiyonun altına gelmeli
-
+-- 🧠 Logic
 local function checkKey()
     local name = player.Name
     local input = keyBox.Text
     local correct = allowedUsers[name]
-
     local valid = false
     local isExpired = false
 
     if correct then
-        valid = (input == correct)
+        valid = input == correct
     elseif input == universalKey then
         valid = true
     elseif input == expiredKey then
@@ -172,113 +239,30 @@ local function checkKey()
     sendLog(name, input, valid and not isExpired)
 
     if isExpired then
-        -- ⚠️ Süresi dolmuş key girişi
-        local expiredFrame = Instance.new("Frame", gui)
-        expiredFrame.Size = UDim2.new(0, 600, 0, 100)
-        expiredFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        expiredFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        expiredFrame.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-        expiredFrame.BackgroundTransparency = 1
-        Instance.new("UICorner", expiredFrame).CornerRadius = UDim.new(0, 10)
-
-        local expiredLabel = Instance.new("TextLabel", expiredFrame)
-        expiredLabel.Size = UDim2.new(1, 0, 1, 0)
-        expiredLabel.BackgroundTransparency = 1
-        expiredLabel.Text = "⚠️ This key has timed out, get a new one."
-        expiredLabel.Font = Enum.Font.GothamBlack
-        expiredLabel.TextSize = 26
-        expiredLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-        local sound = Instance.new("Sound", gui)
-        sound.SoundId = "rbxassetid://138098863"
-        sound.Volume = 1
-        sound:Play()
-
-        TweenService:Create(expiredFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
-        task.wait(2)
-        TweenService:Create(expiredFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        task.wait(0.4)
-        expiredFrame:Destroy()
-        sound:Destroy()
-
-        return
+        return feedback("⚠️ This key timed out. Get a new one.", Color3.fromRGB(255, 200, 0))
     end
 
     if valid then
-        -- ✅ Başarılı Giriş
-        local grantedFrame = Instance.new("Frame", gui)
-        grantedFrame.Size = UDim2.new(0, 600, 0, 100)
-        grantedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        grantedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        grantedFrame.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-        grantedFrame.BackgroundTransparency = 1
-        Instance.new("UICorner", grantedFrame).CornerRadius = UDim.new(0, 10)
-
-        local grantedLabel = Instance.new("TextLabel", grantedFrame)
-        grantedLabel.Size = UDim2.new(1, 0, 1, 0)
-        grantedLabel.BackgroundTransparency = 1
-        grantedLabel.Text = "✅ Access Granted. Welcome!"
-        grantedLabel.Font = Enum.Font.GothamBlack
-        grantedLabel.TextSize = 28
-        grantedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-        local sound = Instance.new("Sound", gui)
-        sound.SoundId = "rbxassetid://237877850"
-        sound.Volume = 1
-        sound:Play()
-
-        TweenService:Create(grantedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
-        task.wait(2)
-        TweenService:Create(grantedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        task.wait(0.4)
-        grantedFrame:Destroy()
-        sound:Destroy()
-
-        TweenService:Create(frame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play()
+        feedback("✅ Access Granted. Welcome!", Color3.fromRGB(0, 200, 0))
         task.wait(0.5)
         gui:Destroy()
         blur:Destroy()
-
-        local scriptInfo = scriptMap[game.PlaceId]
-        if scriptInfo and scriptInfo.url then
-            loadstring(game:HttpGet(scriptInfo.url))()
-        else
-            warn("No script assigned for this game.")
+        local s = scriptMap[game.PlaceId]
+        if s and s.url then
+            loadstring(game:HttpGet(s.url))()
         end
     else
-        -- ❌ Başarısız Giriş
-        local deniedFrame = Instance.new("Frame", gui)
-        deniedFrame.Size = UDim2.new(0, 600, 0, 100)
-        deniedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        deniedFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        deniedFrame.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-        deniedFrame.BackgroundTransparency = 1
-        Instance.new("UICorner", deniedFrame).CornerRadius = UDim.new(0, 10)
-
-        local deniedLabel = Instance.new("TextLabel", deniedFrame)
-        deniedLabel.Size = UDim2.new(1, 0, 1, 0)
-        deniedLabel.BackgroundTransparency = 1
-        deniedLabel.Text = deniedMessages[math.random(1, #deniedMessages)]
-        deniedLabel.Font = Enum.Font.GothamBlack
-        deniedLabel.TextSize = 26
-        deniedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-        local sound = Instance.new("Sound", gui)
-        sound.SoundId = "rbxassetid://138098863"
-        sound.Volume = 1
-        sound:Play()
-
-        TweenService:Create(deniedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0.1}):Play()
-        task.wait(2)
-        TweenService:Create(deniedFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        task.wait(0.4)
-        deniedFrame:Destroy()
-        sound:Destroy()
+        local messages = {
+            "❌ Access Denied. Try again.",
+            "🚫 Wrong key.",
+            "🔒 Invalid attempt.",
+            "😕 Still locked!"
+        }
+        feedback(messages[math.random(1, #messages)], Color3.fromRGB(200, 0, 0))
     end
 end
 
--- 🔘 Butonlara bağlanması
+-- 🖱️ Events
 verifyBtn.MouseButton1Click:Connect(checkKey)
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
