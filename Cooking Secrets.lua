@@ -278,3 +278,55 @@ verifyBtn.MouseButton1Click:Connect(checkKey)
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then checkKey() end
 end)
+
+-- 📎 Discord Butonu
+local discordBtn = Instance.new("ImageButton", frame)
+discordBtn.Size = UDim2.new(0, 28, 0, 28)
+discordBtn.Position = UDim2.new(1, -70, 0, 10)
+discordBtn.BackgroundTransparency = 1
+discordBtn.Image = "rbxassetid://18505728201" -- 👈 Bunu kendi görsel ID’inle değiştir
+
+-- 🟦 Yukarı-Aşağı Hareket (Tween ile dalgalanma)
+local originalDiscordPos = discordBtn.Position
+task.spawn(function()
+	while discordBtn and discordBtn.Parent do
+		TweenService:Create(discordBtn, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			Position = originalDiscordPos + UDim2.new(0, 0, 0, -2)
+		}):Play()
+		task.wait(1)
+		TweenService:Create(discordBtn, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			Position = originalDiscordPos + UDim2.new(0, 0, 0, 2)
+		}):Play()
+		task.wait(1)
+	end
+end)
+
+-- 📋 Tıklanınca panoya kopyala + bildirim kutusu
+discordBtn.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard("https://discord.gg/UWN8XVXzHr")
+	end
+
+	local box = Instance.new("Frame", gui)
+	box.Size = UDim2.new(0, 280, 0, 45)
+	box.AnchorPoint = Vector2.new(0.5, 0.5)
+	box.Position = UDim2.new(0.5, 0, 0.78, 0)
+	box.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	box.BackgroundTransparency = 1
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
+
+	local label = Instance.new("TextLabel", box)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.Text = "📋 Discord Link Copied!"
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.Font = Enum.Font.FredokaOne
+	label.TextSize = 20
+	label.BackgroundTransparency = 1
+
+	TweenService:Create(box, TweenInfo.new(0.3), {BackgroundTransparency = 0.05}):Play()
+	task.wait(1.6)
+	TweenService:Create(box, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+	task.wait(0.3)
+	box:Destroy()
+end)
+
