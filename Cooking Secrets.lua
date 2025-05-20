@@ -31,8 +31,8 @@ local scriptMap = {
     }
 }
 
-local universalKey = "uglyisbest"
-local expiredKey = "freeminium"
+local universalKey = "sexisgreat"
+local expiredKey = "uglyisbest"
 
 -- 🌐 Webhook (obfuscated)
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
