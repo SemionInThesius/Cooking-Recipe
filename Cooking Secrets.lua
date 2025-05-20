@@ -11,6 +11,12 @@ local allowedUsers = {
     ["gocrazyjay0"] = "Jordan21",
     ["KronicIz"] = "Mcboss413",
     ["zxytoxd"] = "oompaloompa",
+    ["jackmartson2"] = "emfod",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
+    ["null"] = "null",
 }
 
 local universalKey = "uglyisbest"
