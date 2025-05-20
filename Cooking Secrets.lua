@@ -12,7 +12,7 @@ local allowedUsers = {
     ["KronicIz"] = "Mcboss413",
     ["zxytoxd"] = "oompaloompa",
     ["Jackmartson2"] = "emfod",
-    ["augustosienna"] = "admin",
+    ["endinakodulaze9"] = "imthebest123",
 }
 
 -- 🎯 Script Map
