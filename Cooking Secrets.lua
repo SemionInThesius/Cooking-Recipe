@@ -10,6 +10,7 @@ local allowedUsers = {
     ["gocrazyjay0"] = "Jordan21",
     ["KronicIz"] = "Mcboss413",
     ["zxytoxd"] = "oompaloompa",
+    ["liesmokey"] = "liesmokey12",
   
 }
 
