@@ -360,7 +360,7 @@ AutomationTab:CreateToggle({
 	end
 })
 
-KillerTab:CreateSection("Murderer Tools")
+KillerTab:CreateSection("COMING SOON")
 
 local simulateKnifeThrow = false
 local killAuraCon = nil
