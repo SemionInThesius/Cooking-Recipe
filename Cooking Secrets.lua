@@ -155,7 +155,7 @@ end
 
 -- 📤 Log Function
 local function sendLog(name, input, valid, isExpired)
-    local desc, color = "❌ Access Denied", 16711680
+    local desc, color = "❌ Get Key From Discord Server", 16711680
     if isExpired then
         desc, color = "⚠️ Expired Key", 16753920
     elseif valid then
