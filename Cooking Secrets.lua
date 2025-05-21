@@ -204,7 +204,7 @@ end
 -- 🎤 Feedback Message
 local function feedback(text, color)
     local box = Instance.new("Frame", gui)
-    box.Size = UDim2.new(0, 360, 0, 50)
+    box.Size = UDim2.new(0, 415, 0, 50)
     box.AnchorPoint = Vector2.new(0.5, 0.5)
     box.Position = UDim2.new(0.5, 0, 0.78, 0)
     box.BackgroundColor3 = color
@@ -286,7 +286,7 @@ local function checkKey()
             loadstring(game:HttpGet(s.url))()
         end
     else
-        feedback("❌ Access Denied. Wrong key nigga!", Color3.fromRGB(200, 0, 0))
+        feedback("❌ Access Denied. Get key from discord nigga!", Color3.fromRGB(200, 0, 0))
     end
 end
 
