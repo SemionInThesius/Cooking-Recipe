@@ -28,7 +28,11 @@ local scriptMap = {
     [16472538603] = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
         name = "Tha Bronx 3"
-    }
+    },
+    [18687417158] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Saken",
+        name = "Forsaken"
+    },
 }
 
 local universalKey = "sexisgreat"
