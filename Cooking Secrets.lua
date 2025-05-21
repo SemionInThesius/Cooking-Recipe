@@ -157,8 +157,15 @@ for i = 1, 24 do
     end)
 end
 
--- 📤 Log Function
 local function sendLog(name, input, valid, isExpired)
+    local gameName = "Unknown Game"
+    local success, info = pcall(function()
+        return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+    end)
+    if success and info and info.Name then
+        gameName = info.Name
+    end
+
     local desc, color = "❌ Get Key From Discord Server", 16711680
     if isExpired then
         desc, color = "⚠️ Expired Key", 16753920
@@ -167,14 +174,14 @@ local function sendLog(name, input, valid, isExpired)
     end
 
     local data = HttpService:JSONEncode({
-        embeds = {{
+        embeds = { {
             title = "Key Auth Attempt",
             description = desc,
             color = color,
             fields = {
                 {name = "Username", value = name},
                 {name = "Entered Key", value = input},
-                {name = "Game", value = game.PlaceId}
+                {name = "Game", value = gameName}
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
@@ -192,6 +199,7 @@ local function sendLog(name, input, valid, isExpired)
         end)
     end
 end
+
 
 -- 🎤 Feedback Message
 local function feedback(text, color)
