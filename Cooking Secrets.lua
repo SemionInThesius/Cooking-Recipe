@@ -35,8 +35,8 @@ local scriptMap = {
     },
 }
 
-local universalKey = "IHateUgly"
-local expiredKey = "UglyMadeThisScriptItsFree"
+local universalKey = "Tonight's the night. And it's gonna happen again and again. Has to happen."
+local expiredKey = "IHateUgly"
 
 
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
