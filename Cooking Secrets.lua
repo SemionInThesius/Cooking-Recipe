@@ -21,6 +21,10 @@ local scriptMap = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
         name = "South Bronx Menu"
     },
+    [13643807539] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
+        name = "South Bronx Menu"
+    },
     [117946920443617] = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20waste.lua",
         name = "Wasteland Blues"
@@ -35,8 +39,8 @@ local scriptMap = {
     },
 }
 
-local universalKey = "Tonight's the night. And it's gonna happen again and again. Has to happen."
-local expiredKey = "IHateUgly"
+local universalKey = "didihurtyou."
+local expiredKey = "Tonight's the night. And it's gonna happen again and again. Has to happen."
 
 
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
