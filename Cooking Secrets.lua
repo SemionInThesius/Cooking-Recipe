@@ -13,6 +13,8 @@ local allowedUsers = {
     ["zxytoxd"] = "oompaloompa",
     ["Jackmartson2"] = "emfod",
     ["endinakodulaze9"] = "imthebest123",
+    ["YkMezzo"] = "KillTheJews",
+    ["dvsfsdasca"] = "JewKiller",
 }
 
 -- 🎯 Script Map
