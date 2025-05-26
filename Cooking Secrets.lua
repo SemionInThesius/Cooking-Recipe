@@ -23,7 +23,7 @@ local scriptMap = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
         name = "South Bronx Menu"
     },
-    [13643807539] = {
+    [14413475235] = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Recipe",
         name = "South Bronx Menu"
     },
