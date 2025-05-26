@@ -3364,38 +3364,6 @@ local function getPrompt()
     return success and prompt or nil
 end
 
--- 📦 Gerekli Servisler
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local Backpack = player:WaitForChild("Backpack")
-local Character = player.Character or player.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local humanoid = Character:WaitForChild("Humanoid")
-
--- 🔍 Satış Prompt'unu Al
-local function getPrompt()
-    local npc = workspace:FindFirstChild("NPCs")
-    if not npc then return nil end
-
-    local lamont = npc:FindFirstChild("Lamont Bell")
-    if not lamont then return nil end
-
-    local torso = lamont:FindFirstChild("UpperTorso")
-    if not torso then return nil end
-
-    local prompt = torso:FindFirstChildOfClass("ProximityPrompt")
-    if prompt then
-        prompt.HoldDuration = 0
-        prompt.Enabled = true
-        return prompt
-    end
-
-    return nil
-end
-
--- 🔁 Toggle Durumu
-local toggleActive = false
-
 -- 🔄 Toggle: Sell All Marshmallows
 local marshToggle = FarmsSection:AddToggle({
     Name = "🔥 Sell All Marshmallows",
@@ -3406,8 +3374,8 @@ local marshToggle = FarmsSection:AddToggle({
         if toggleActive then
             task.spawn(function()
                 while toggleActive do
-                    -- 🧂 Marshmallow item'i bul
                     local foundItem = nil
+
                     for _, item in ipairs(Backpack:GetChildren()) do
                         if item:IsA("Tool") and item.Name:lower():find("marshmallow") then
                             foundItem = item
@@ -3416,17 +3384,12 @@ local marshToggle = FarmsSection:AddToggle({
                     end
 
                     if foundItem then
-                        -- 🎒 Eline al ve NPC'ye yaklaş
-                        humanoid:EquipTool(foundItem)
-                        task.wait(0.2)
-
                         local prompt = getPrompt()
                         if prompt then
-                            -- 📍 NPC'ye TP ol (yaklaşmak için)
-                            HumanoidRootPart.CFrame = prompt.Parent.CFrame + Vector3.new(0, 2, 0)
-                            task.wait(0.3)
+                            foundItem.Parent = Character
+                            task.wait(0.2)
                             fireproximityprompt(prompt)
-                            task.wait(0.4)
+                            task.wait(0.3)
                         else
                             warn("⚠️ Prompt not found!")
                             break
@@ -3440,10 +3403,7 @@ local marshToggle = FarmsSection:AddToggle({
         end
     end
 })
-
--- 🎯 Her zaman görünür olsun
-marshToggle.Visible = true
-
+marshToggle.Visible = true -- 🎯 Her zaman görünür
 
 -- 🛒 Button: Buy All Ingredients
 local buyButton = FarmsSection:AddButton({
