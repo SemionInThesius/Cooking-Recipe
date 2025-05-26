@@ -2,12 +2,21 @@
     This script Made by whoisthisugly
 ]]--
 
+local OldRawGet = clonefunction(rawget)
 
-local Library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)("Pepsi's UI Library")
+hookfunction(rawget, newcclosure(function(...)
+    if string.len(getcallingscript().Name) == 42 then
+        return task.wait(9e9)
+    else
+        return OldRawGet(...)
+    end
+end))
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/whoisthisugl2/ss/refs/heads/main/pepsiplayermain"))()
 
     -- Create main window
     local Window = Library:CreateWindow({
-        Name = "whoisthisugly V1.2",
+        Name = "whoisthisugly South Bronx",
         Themeable = {
             Info = 'By whoisthisugly',
             Credit = True, -- Shows library 
@@ -60,16 +69,6 @@ MainSection:AddToggle({
     end
 })
 
-MainSection:AddToggle({
-    Name = "| Hitbox Expander",
-    StartingState = false,
-    Description = "This Expands the Hitbox of Players.",
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/whoisthisugl2/ss/refs/heads/main/hitbox%20expander'))()
-        end
-    end
-})
 
 MainSection:AddToggle({
     Name = "| Forward Teleport ( T )",
@@ -95,15 +94,7 @@ MainSection:AddToggle{
       end)
     end
 }
-MainSection:AddToggle({
-    Name = "| Fly ( V )",
-    StartingState = false,
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/whoisthisugl2/ss/refs/heads/main/fly%20v'))()
-        end
-    end
-})
+
 
 MainSection:AddToggle({
     Name = "| Invisible ( X )",
@@ -700,7 +691,7 @@ local Slider = GunSection:AddSlider({
     Name = 'Firerate Settings',
     Flag = "sliderRate",
     Value = 0.147, 
-    Min = 0.03, 
+    Min = 0.000001, 
     Max = 0.147, 
     Decimals = 3, 
     Callback = function(Value)
@@ -1699,28 +1690,62 @@ end
 
 
 local FarmTab = Window:CreateTab({
-    Name = 'Farm'
+    Name = 'Settings'
 })
 
-local FarmsSection = FarmTab:CreateSection({
-    Name = '|Farms|',
-    Side = 'Left'
-})
 local StatsSection = FarmTab:CreateSection({
-    Name = '|Auto Farm States|',
-    Side = 'Right'
+    Name = '|Auto Farm Settings|',
+    Side = 'left'
 })
 
 
 
--- 📡 Dynamic Farm Webhook Alert System
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local SoundService = game:GetService("SoundService")
+
 local alertedFarmPlayers = {}
 local farmWebhookUrl = ""
 local farmAlertDistance = 50
 local farmProximityEnabled = false
+local playSoundOnAlert = false
+local alertSoundId = "rbxassetid://103223418695892"
+local sendTTSMessage = false
 
+-- Webhook TTS Mesaj Fonksiyonu
+local function sendTTSAlert(playerName)
+    local data = {
+        ["content"] = "a player near your location has been detected",
+        ["tts"] = true
+    }
+
+    local body = HttpService:JSONEncode(data)
+    local headers = {["Content-Type"] = "application/json"}
+
+    local req = http_request or request or syn.request or HttpPost
+    pcall(function()
+        req({
+            Url = farmWebhookUrl,
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+    end)
+end
+
+-- Ses Oynatma Fonksiyonu
+local function playAlertSound()
+    local sound = Instance.new("Sound", SoundService)
+    sound.SoundId = alertSoundId
+    sound.Volume = 2
+    sound:Play()
+    sound.Ended:Connect(function()
+        sound:Destroy()
+    end)
+end
+
+-- Ana Yakınlık Sistemi
 StatsSection:AddTextbox({
     Name = "🌐 Farm Webhook URL",
     Value = "",
@@ -1739,9 +1764,30 @@ StatsSection:AddSlider({
     end
 })
 
+StatsSection:AddTextbox({
+    Name = "🔊 Alert Sound ID",
+    Value = "103223418695892",
+    Callback = function(input)
+        alertSoundId = "rbxassetid://" .. tostring(input)
+    end
+})
+
+StatsSection:AddToggle({
+    Name = "🎤 Enable TTS Message",
+    Callback = function(state)
+        sendTTSMessage = state
+    end
+})
+
+StatsSection:AddToggle({
+    Name = "🔊 Play Sound On Alert",
+    Callback = function(state)
+        playSoundOnAlert = state
+    end
+})
+
 StatsSection:AddToggle({
     Name = "🔔 Enable Farm Proximity Alerts",
-    Flag = "FarmProxToggle",
     Callback = function(state)
         farmProximityEnabled = state
 
@@ -1756,6 +1802,18 @@ StatsSection:AddToggle({
                                 local dist = (player.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
                                 if dist <= farmAlertDistance and not alertedFarmPlayers[player.UserId] then
                                     alertedFarmPlayers[player.UserId] = true
+
+                                    -- 🔊 Ses çal
+                                    if playSoundOnAlert then
+                                        playAlertSound()
+                                    end
+
+                                    -- 🔉 TTS mesaj yolla
+                                    if sendTTSMessage then
+                                        sendTTSAlert(player.Name)
+                                    end
+
+                                    -- 📦 Envanter mesajı
                                     local items = {}
                                     for _, tool in ipairs(player.Backpack:GetChildren()) do table.insert(items, tool.Name) end
                                     for _, tool in ipairs(player.Character:GetChildren()) do if tool:IsA("Tool") then table.insert(items, tool.Name) end end
@@ -1774,11 +1832,17 @@ StatsSection:AddToggle({
                                         }}
                                     }
 
+                                    local body = HttpService:JSONEncode(embed)
                                     local headers = {["Content-Type"] = "application/json"}
-                                    local body = game:GetService("HttpService"):JSONEncode(embed)
                                     local req = http_request or request or syn.request or HttpPost
+
                                     pcall(function()
-                                        req({ Url = farmWebhookUrl, Method = "POST", Headers = headers, Body = body })
+                                        req({
+                                            Url = farmWebhookUrl,
+                                            Method = "POST",
+                                            Headers = headers,
+                                            Body = body
+                                        })
                                     end)
                                 elseif dist > farmAlertDistance then
                                     alertedFarmPlayers[player.UserId] = nil
@@ -1786,13 +1850,13 @@ StatsSection:AddToggle({
                             end
                         end
                     end
-                    wait(2)
+                    task.wait(2)
                 end
             end)
         end
     end
 })
-
+ 
 
 
 _G.AGAME = game.PlaceId
@@ -1963,21 +2027,392 @@ StatsSection:AddToggle({
     end
 })
 
-local Button = FarmsSection:AddButton({
-    Name = "Box Autofarm",
-    Callback = function()
+-- 🧱 Tab Oluşturma
+local FarmTab = Window:CreateTab({
+    Name = "Farm",
+    Icon = "rbxassetid://7072706620"
+})
+
+local FarmsSection = FarmTab:CreateSection({
+    Name = "⛏️ Farm Tools",
+    Side = "Left"
+})
+
+local StatsSection = FarmTab:CreateSection({
+    Name = "📊 Farm statistics",
+    Side = "Right"
+})
+
+-- 📦 Kutu Taşıma Otomasyonu
+local boxFarmEnabled = false
+local boxFarmThread = nil
+local cratesMoved = 0
+local startTime = os.clock()
+
+local crateComments = {
+    "man i hate this box job",
+    "bruh its so slowww",
+    "yo dont kill me gng",
+    "chill man im trying to work",
+    "why my mother never loved me",
+    "i guess im wasting my time on a lego game holding boxes"
+}
+
+local boxFarmEnabled = false
+local boxFarmThread = nil
+local cratesMoved = 0
+local startTime = os.clock()
+
+local boxFarmEnabled = false
+local boxFarmThread = nil
+local cratesMoved = 0
+local startTime = os.clock()
+
+-- movedLabel ve moneyLabel sadece bir kez oluşturulmalı
+local movedLabel = StatsSection:AddLabel("Boxxes Carried: 0")
+local moneyLabel = StatsSection:AddLabel("Hourly Earnings: $0")
+
+FarmsSection:AddToggle({
+    Name = "📦 Auto Box AI Farm",
+    StartingState = false,
+    Callback = function(state)
+        boxFarmEnabled = state
+        if state then
+            boxFarmThread = task.spawn(function()
+                local Players = game:GetService("Players")
+                local player = Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+                local rootPart = character:WaitForChild("HumanoidRootPart")
+                local backpack = player:WaitForChild("Backpack")
+
+                humanoid.WalkSpeed = 20
+
+                local positions = {
+                    pickup = Vector3.new(-551.46, 3.54, -86.13),
+                    waitSpot = Vector3.new(-540.16, 3.54, -83.06),
+                    truck = Vector3.new(-401.42, 3.36, -70.90)
+                }
+
+                local function pressE(duration)
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                    task.wait(duration)
+                    vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end
+
+                local function moveToSpam(pos, threshold)
+                    humanoid:MoveTo(pos)
+                    while boxFarmEnabled and (rootPart.Position - pos).Magnitude > threshold do
+                        humanoid:MoveTo(pos)
+                        task.wait(0.2)
+                    end
+                end
+
+                local function getCrateFromBackpack()
+                    for _, item in ipairs(backpack:GetChildren()) do
+                        if item.Name == "Crate" then
+                            return item
+                        end
+                    end
+                    return nil
+                end
+
+                local function equipCrate(crate)
+                    if crate and crate:IsA("Tool") then
+                        crate.Parent = character
+                        if crate:FindFirstChild("Handle") then
+                            crate.Handle.CFrame = character:WaitForChild("RightHand").CFrame
+                        end
+                    end
+                end
+
+                while boxFarmEnabled do
+                    moveToSpam(positions.pickup, 3)
+                    if not boxFarmEnabled then break end
+
+                    pressE(2.5)
+                    task.wait(0.2)
+
+                    local crate = getCrateFromBackpack()
+                    equipCrate(crate)
+
+                    moveToSpam(positions.waitSpot, 3)
+                    if not boxFarmEnabled then break end
+
+                    moveToSpam(positions.truck, 3)
+                    if not boxFarmEnabled then break end
+
+                    pressE(2.5)
+                    cratesMoved += 1
+                    movedLabel:SetText("Boxxes Carried: " .. cratesMoved)
+
+                    local elapsed = os.clock() - startTime
+                    local hourlyRate = math.floor((cratesMoved * 65) / (elapsed / 3600))
+                    moneyLabel:SetText("Hourly Earnings: $" .. hourlyRate)
+
+                    moveToSpam(positions.waitSpot, 3)
+                    task.wait(1)
+                end
+            end)
+        else
+            if boxFarmThread then
+                task.cancel(boxFarmThread)
+                boxFarmThread = nil
+            end
+        end
+    end
+})
+
+-- Full Auto Marshmallow Script - Sabitleme ve Dönme Özelliği ile
+
+local marshTarget = 1
+
+FarmsSection:AddSlider({
+    Name = "🕙 Marshmallow Amount",
+    Min = 1,
+    Max = 150,
+    Default = 1,
+    Increment = 1,
+    Callback = function(value)
+        marshTarget = value
+    end
+})
+
+FarmsSection:AddToggle({
+    Name = "🚨 Full Auto Marshmallow",
+    StartingState = false,
+    Callback = function(state)
+        marshFarmEnabled = state
+        if marshFarmEnabled then
+            marshFarmThread = task.spawn(function()
+                local Players = game:GetService("Players")
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local VirtualInputManager = game:GetService("VirtualInputManager")
+                local player = Players.LocalPlayer
+                local Backpack = player:WaitForChild("Backpack")
+                local character = player.Character or player.CharacterAdded:Wait()
+                local hrp = character:WaitForChild("HumanoidRootPart")
+                local humanoid = character:WaitForChild("Humanoid")
+
+                local function countMarshmallows()
+                    local count = 0
+                    for _, item in ipairs(Backpack:GetChildren()) do
+                        if item:IsA("Tool") and item.Name:lower():find("marshmallow") then
+                            count += 1
+                        end
+                    end
+                    return count
+                end
+
+                local function sellMarshmallows(limit)
+                    local prompt = workspace.NPCs["Lamont Bell"].UpperTorso:FindFirstChildOfClass("ProximityPrompt")
+                    if not prompt then return end
+                    prompt.HoldDuration = 0
+                    local sold = 0
+                    for _, item in ipairs(Backpack:GetChildren()) do
+                        if item:IsA("Tool") and item.Name:lower():find("marshmallow") then
+                            item.Parent = character
+                            task.wait(0.2)
+                            fireproximityprompt(prompt)
+                            task.wait(0.3)
+                            sold += 1
+                            if limit and sold >= limit then break end
+                        end
+                    end
+                end
+
+                local function equipTool(name)
+                    local tool = Backpack:FindFirstChild(name)
+                    if tool then
+                        humanoid:EquipTool(tool)
+                        return true
+                    end
+                    return false
+                end
+
+                local function pressE()
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                    task.wait(0.05)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end
+
+                local function produce()
+                    local steps = {
+                        {tool = "Water", wait = 1},
+                        {tool = "Water", wait = 1},
+                        {wait = 2},
+                        {tool = "Sugar Block Bag", wait = 1},
+                        {tool = "Gelatin", wait = 1},
+                        {tool = "Empty Bag", wait = 1}
+                    }
+                    for _, step in ipairs(steps) do
+                        if not marshFarmEnabled then return end
+                        if step.tool then equipTool(step.tool) end
+                        pressE()
+                        task.wait(step.wait)
+                    end
+                end
+
+                local function lockToPosition(model, position, rotation)
+                    local alignPos = Instance.new("AlignPosition", model)
+                    alignPos.Position = position
+                    alignPos.RigidityEnabled = true
+                    alignPos.Responsiveness = 200
+                    alignPos.MaxForce = 9999999
+
+                    local alignOri = Instance.new("AlignOrientation", model)
+                    alignOri.CFrame = rotation
+                    alignOri.RigidityEnabled = true
+                    alignOri.Responsiveness = 200
+                    alignOri.MaxTorque = 9999999
+
+                    local attachmentA = Instance.new("Attachment", model.PrimaryPart)
+                    local attachmentB = Instance.new("Attachment")
+                    attachmentB.Parent = workspace.Terrain
+                    alignPos.Attachment0 = attachmentA
+                    alignPos.Attachment1 = attachmentB
+                    alignOri.Attachment0 = attachmentA
+                    alignOri.Attachment1 = attachmentB
+
+                    attachmentB.WorldPosition = position
+                    attachmentB.WorldCFrame = rotation
+                end
+
+                -- Araç spawn ve binme
+                ReplicatedStorage.RemoteEvents.GetStat:InvokeServer("Vehicles", "DirtBike")
+                ReplicatedStorage.RemoteEvents.Dealershipinteraction:FireServer("Spawn", "DirtBike")
+                local carName = player.Name .. "'s Car"
+                local car
+                repeat
+                    car = workspace:FindFirstChild(carName)
+                    task.wait(0.2)
+                until car
+
+                local seat = car:FindFirstChild("DriveSeat") or car:FindFirstChildWhichIsA("VehicleSeat")
+                local prompt = seat and seat:FindFirstChild("Attachment") and seat.Attachment:FindFirstChildOfClass("ProximityPrompt")
+                if not (seat and prompt) then return end
+
+                prompt.HoldDuration = 0
+
+                for i = 1, 30 do
+                    if not car.PrimaryPart then car.PrimaryPart = seat end
+                    car:SetPrimaryPartCFrame(seat.CFrame + Vector3.new(0, 3, 0))
+                    hrp.CFrame = seat.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                    fireproximityprompt(prompt)
+                    task.wait(0.2)
+                    if seat.Occupant == humanoid then break end
+                end
+
+                -- Lamont Bell'e TP
+                local lamontCFrame = CFrame.new(510.336, 6.587, 598.096)
+                car:SetPrimaryPartCFrame(lamontCFrame)
+                task.wait(1)
+
+                -- Malzeme satin al
+                for _, item in ipairs({"Sugar Block Bag", "Water", "Gelatin"}) do
+                    for i = 1, marshTarget do
+                        ReplicatedStorage.RemoteEvents.StorePurchase:FireServer(item)
+                        task.wait(0.1)
+                    end
+                end
+                task.wait(1)
+
+                -- Pot kontrol lokasyonu
+                local potCheckCFrame = CFrame.new(1020.17853, 3.73, 228.249435)
+                car:SetPrimaryPartCFrame(potCheckCFrame)
+                task.wait(1)
+
+                -- Apartmanlar
+                local aptList = {}
+                for _, apt in ipairs(workspace.Map.APTS:GetChildren()) do
+                    if apt:IsA("Model") then
+                        local dist = (apt:GetModelCFrame().Position - car:GetPrimaryPartCFrame().Position).Magnitude
+                        if dist <= 400 then
+                            table.insert(aptList, apt)
+                        end
+                    end
+                end
+
+                local selectedPot = nil
+                for _, apt in ipairs(aptList) do
+                    local board = apt:FindFirstChild("Board")
+                    local priceGui = board and board:FindFirstChild("price") and board.price:FindFirstChild("SurfaceGui")
+                    local backPrompt = board and board:FindFirstChild("backboard") and board.backboard:FindFirstChildOfClass("ProximityPrompt")
+                    if priceGui and priceGui.Enabled and backPrompt then
+                        backPrompt.HoldDuration = 0
+                        car:SetPrimaryPartCFrame(backPrompt.Parent.CFrame + Vector3.new(0, 2, 0))
+                        hrp.CFrame = backPrompt.Parent.CFrame + Vector3.new(0, 2, 0)
+                        task.wait(0.3)
+                        fireproximityprompt(backPrompt)
+                        task.wait(1)
+                        local house = workspace.Map.Houses:FindFirstChild(apt.Name)
+                        if house then
+                            local interior = house:FindFirstChild("Interior")
+                            local pot = interior and interior:FindFirstChild("Cooking Pot")
+                            if pot then
+                                selectedPot = pot
+                                break
+                            end
+                        end
+                    end
+                end
+
+                if not selectedPot then warn("❌ Cooking Pot bulunamadı.") return end
+
+                local offset = (-selectedPot.CFrame.LookVector * 2) + (-selectedPot.CFrame.RightVector * 1) + Vector3.new(0, 3, 0)
+                local basePos = selectedPot.Position + offset
+                local baseRot = CFrame.new(basePos) * CFrame.Angles(0, math.rad(180), 0)
+                car:SetPrimaryPartCFrame(baseRot)
+                lockToPosition(car, basePos, baseRot)
+
+                -- Üretim
+                for i = 1, marshTarget do
+                    if not marshFarmEnabled then break end
+                    produce()
+                    task.wait(1)
+                end
+
+                local waitTime = 0
+                while marshFarmEnabled and countMarshmallows() < marshTarget and waitTime < 120 do
+                    produce()
+                    task.wait(1)
+                    waitTime += 1
+                end
+
+                if countMarshmallows() < marshTarget then
+                    warn("❌ Yeterli marshmallow üretilemedi. Satış yapılmayacak.")
+                    return
+                end
+
+                car:SetPrimaryPartCFrame(lamontCFrame)
+                task.wait(1.2)
+                sellMarshmallows(marshTarget)
+            end)
+        elseif marshFarmThread then
+            task.cancel(marshFarmThread)
+            marshFarmThread = nil
+        end
+    end
+})
+
+
+
+local running = false
+local autofarmThread = nil
+
+local Button = FarmsSection:AddToggle({
+    Name = "🧁 MarshMallow Autofarm",
+    StartingState = false,
+    Callback = function(state)
+        running = state
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoid = character:WaitForChild("Humanoid")
-        local virtualInputManager = game:GetService("VirtualInputManager")
         local userInputService = game:GetService("UserInputService")
-        local backpack = player.Backpack 
-
-        local konum1 = Vector3.new(-551.46, 3.54, -86.13)
-        local konum2 = Vector3.new(-540.16, 3.54, -83.06)
-        local konum3 = Vector3.new(-401.42, 3.36, -70.90)
-
-        local isRunning = true
+        local virtualInputManager = game:GetService("VirtualInputManager")
+        local workspaceService = game:GetService("Workspace")
 
         local function pressE()
             virtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
@@ -1987,233 +2422,59 @@ local Button = FarmsSection:AddButton({
             virtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
         end
 
-        local function moveToPosition(position)
-            humanoid.WalkSpeed = 20 
-            humanoid:MoveTo(position)
-            while isRunning and (character.HumanoidRootPart.Position - position).Magnitude > 1 do
-                wait()
-                if humanoid.MoveToFinished then
-                    humanoid:MoveTo(position)
-                end
-            end
-            humanoid.WalkSpeed = 16 
-            print("Moved to: ", position)
-        end
-
-        local function getCrateFromBackpack()
-            for _, item in ipairs(backpack:GetChildren()) do
-                if item.Name == "Crate" then 
-                    return item
-                end
-            end
-            return nil
-        end
-
-        local function equipCrate(crate)
-            if crate then
-                crate.Parent = character
-                crate.Handle.CFrame = character:WaitForChild("RightHand").CFrame 
-                print("Equipped Crate")
-            else
-                print("Crate not found in backpack")
-            end
-        end
-
-        local function performAction()
-            if not isRunning then return end
-            moveToPosition(konum1)
-
-            if not isRunning then return end
-            pressE()
-            releaseE()
-
-            if not isRunning then return end
-            moveToPosition(konum2)
-
-            if not isRunning then return end
-            moveToPosition(konum3)
-
-            if not isRunning then return end
-            local crate = getCrateFromBackpack()
-
-            if not isRunning then return end
-            equipCrate(crate)
-
-            if not isRunning then return end
-            pressE()
-            releaseE()
-
-            if not isRunning then return end
-            moveToPosition(konum2)
-
-            if not isRunning then return end
-            moveToPosition(konum1)
-        end
-
-        spawn(function()
-            while isRunning do
-                performAction()
-                wait(1)  
-            end
-        end)
-
-        userInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-            if input.KeyCode == Enum.KeyCode.P then
-                isRunning = false
-                humanoid:MoveTo(character.HumanoidRootPart.Position)
-            end
-        end)
-
-    end
-})
-
-local Button = FarmsSection:AddButton({
-    Name = "Chips Autofarm",
-    Callback = function()
-        local positions = {
-            {pos = Vector3.new(-461.62, 3.86, -467.55), tool = "Potato", holdE = true, holdTime = 0, waitTime = 2},
-            {pos = Vector3.new(-461.6, 3.86, -473.63), holdE = true, holdTime = 0, waitTime = 2},
-            {pos = Vector3.new(-466.43, 3.96, -500.60)},
-            {pos = Vector3.new(-462.67, 3.86, -522.34), tool = "Flour", holdE = true, holdTime = 0, waitTime = 2},
-            {pos = Vector3.new(-468.11, 3.86, -494.76)},
-            {pos = Vector3.new(-515.34, 3.86, -482.29), holdE = true, holdTime = 0, waitTime = 65, reholdE = true, reholdTime = 0},
-            {pos = Vector3.new(-492, 4, -473)}, 
-            {pos = Vector3.new(-480, 4, -434), holdE = true, holdTime = 0}
-        }
-
-        local stopLoop = false
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 19
-
-        local function moveTo(position)
-            humanoid:MoveTo(position)
-            humanoid.MoveToFinished:Wait()
-        end
-
-        local function performAction(action)
-            if action.tool then
-            end
-
-            if action.holdE then
-                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                wait(action.holdTime)
-                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
-            end
-
-            wait(action.waitTime)
-        end
-
-        local function onKeyPress(key)
-            if key == Enum.KeyCode.P then
-                stopLoop = true
-            end
-        end
-
-        game:GetService("UserInputService").InputBegan:Connect(function(input)
-            onKeyPress(input.KeyCode)
-        end)
-
-        for i, v in pairs(game:GetService("Workspace"):GetDescendants()) do
-            if v:IsA("ProximityPrompt") then
-                v["HoldDuration"] = 0
-            end
-        end
-
-        game:GetService("ProximityPromptService").PromptButtonHoldBegan:Connect(function(v)
-            v["HoldDuration"] = 0
-        end)
-
-        while not stopLoop do
-            for _, action in ipairs(positions) do
-                moveTo(action.pos)
-                performAction(action)
-
-                if action.reholdE then
-                    performAction({holdE = true, holdTime = action.reholdTime})
-                end
-
-                if stopLoop then break end
-            end
-        end
-
-    end
-})
-
-local Button = FarmsSection:AddButton({
-    Name = "MarshMallow Autofarm",
-    Callback = function()
-        local stopLoop = false
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
-
-        local userInputService = game:GetService("UserInputService")
-        local virtualInputManager = game:GetService("VirtualInputManager")
-        local workspaceService = game:GetService("Workspace")
-
         local function equipTool(toolName)
             local backpack = player.Backpack
             local tool = backpack:FindFirstChild(toolName)
             if tool then
                 humanoid:EquipTool(tool)
+                return true
             end
-        end
-
-        local function performAction(action)
-            if action.tool then
-                equipTool(action.tool)
-            end
-
-            if action.holdE then
-                virtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                wait(action.holdTime)
-                virtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-            end
-
-            wait(action.waitTime)
+            return false
         end
 
         local actions = {
             {tool = "Water", holdE = true, holdTime = 0, waitTime = 1},
-            {tool = "Water", holdE = true, holdTime = 0, waitTime = 22},
+            {tool = "Water", holdE = true, holdTime = 0, waitTime = 1},
             {holdE = true, holdTime = 0, waitTime = 2},
-            {tool = "Sugar Block Bag", holdE = true, holdTime = 0, waitTime = 2},
-            {tool = "Gelatin", holdE = true, holdTime = 0, waitTime = 46},
-            {tool = "Empty Bag", holdE = true, holdTime = 0, waitTime = 2},
+            {tool = "Sugar Block Bag", holdE = true, holdTime = 0, waitTime = 1},
+            {tool = "Gelatin", holdE = true, holdTime = 0, waitTime = 1},
+            {tool = "Empty Bag", holdE = true, holdTime = 0, waitTime = 1},
         }
 
-        userInputService.InputBegan:Connect(function(input)
-            if input.KeyCode == Enum.KeyCode.P then
-                stopLoop = true
-            end
-        end)
-
+        -- ProximityPrompt'ları sıfırla
         for _, v in pairs(workspaceService:GetDescendants()) do
             if v:IsA("ProximityPrompt") then
                 v.HoldDuration = 0
             end
         end
 
-        while not stopLoop do
-            for _, action in pairs(actions) do
-                performAction(action)
-            end
+        if running and not autofarmThread then
+            autofarmThread = task.spawn(function()
+                while running do
+                    for _, action in pairs(actions) do
+                        if not running then break end
+
+                        if action.tool then
+                            equipTool(action.tool)
+                        end
+                        if action.holdE then
+                            pressE()
+                            task.wait(action.holdTime)
+                            releaseE()
+                        end
+                        task.wait(action.waitTime)
+                    end
+                end
+                autofarmThread = nil -- temizlik
+            end)
+        elseif not running and autofarmThread then
+            -- Otomatik olarak loop kendini durduracak zaten
+            -- flag'imiz false olduğu için
         end
-
     end
 })
 
-local Button = FarmsSection:AddButton({
-    Name = "Rob Farm",
-    StartingState = false,
-    Description = "This Starts the Rob Farm Script.",
-    Callback = function()
-        loadstring(game:HttpGet('https://pastebin.com/raw/B01jjSD2'))()
-    end
-})
+
 
         local ATMSection = GeneralTab:CreateSection({
             Name = 'ATM',
@@ -2244,208 +2505,6 @@ local function teleportAndFireProximity(targetCFrame, proximityPrompt)
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalCFrame
 end
 
-ATMSection:AddDropdown({
-    Name = "Atm Locations",
-    List = {"Apartments 1", "Apartments 2", "Apartments 3", "B&b (Glasses Store)", "Bank", "Boxing Gym", "Bronx Sneaker Club", "Car Shop", "Cosmic Cuts", "Fake ID", "Garbage Job", "Gun Store 1", "Gun Store 2", "Kevins Drip", "Pluto's Headwear", "Police Station", "Studio"},
-    Callback = function(item)
-        local targetCFrame
-        local proximityPrompt
-
-        if item == "Atm 1" then
-            targetCFrame = CFrame.new(-33.14869689941406, 3.737027168273926, -299.5453186035156)
-            proximityPrompt = workspace.Map.ATMS.ATM1.Attachment.ProximityPrompt
-        elseif item == "Atm 2" then
-            targetCFrame = CFrame.new(538.4818115234375, 3.737133026123047, -349.04150390625)
-            proximityPrompt = workspace.Map.ATMS.ATM2.Attachment.ProximityPrompt
-        elseif item == "Atm 3" then
-            targetCFrame = CFrame.new(497.8156433105469, 3.783940315246582, 405.568115234375)
-            proximityPrompt = workspace.Map.ATMS.ATM3.Attachment.ProximityPrompt
-        elseif item == "Atm 4" then
-            targetCFrame = CFrame.new(236.174774, 3.11795044, -165.397308)
-            proximityPrompt = workspace.Map.ATMS.ATM4.Attachment.ProximityPrompt
-        elseif item == "Atm 5" then
-            targetCFrame = CFrame.new(-652.0218505859375, 4.2857208251953125, 155.16903686523438)
-            proximityPrompt = workspace.Map.ATMS.ATM5.Attachment.ProximityPrompt
-        elseif item == "Atm 6" then
-            targetCFrame = CFrame.new(-455.13043212890625, 4.310722351074219, 370.83111572265625)
-            proximityPrompt = workspace.Map.ATMS.ATM6.Attachment.ProximityPrompt
-        elseif item == "Atm 7" then
-            targetCFrame = CFrame.new(-266.3022155761719, 4.405771732330322, -212.23641967773438)
-            proximityPrompt = workspace.Map.ATMS.ATM7.Attachment.ProximityPrompt
-        elseif item == "Atm 8" then
-            targetCFrame = CFrame.new(-10.494017601013184, 3.7371325492858887, 233.98435974121094)
-            proximityPrompt = workspace.Map.ATMS.ATM8.Attachment.ProximityPrompt
-        elseif item == "Atm 9" then
-            targetCFrame = CFrame.new(717.041748046875, 3.817620277404785, 413.7100524902344)
-            proximityPrompt = workspace.Map.ATMS.ATM9.Attachment.ProximityPrompt
-        elseif item == "Atm 10" then
-            targetCFrame = CFrame.new(-536.8208618164062, 4.285721778869629, -20.354114532470703)
-            proximityPrompt = workspace.Map.ATMS.ATM10.Attachment.ProximityPrompt
-        elseif item == "Atm 11" then
-            targetCFrame = CFrame.new(-652.0218505859375, 4.2857208251953125, 155.16903686523438)
-            proximityPrompt = workspace.Map.ATMS.ATM11.Attachment.ProximityPrompt
-        elseif item == "Atm 12" then
-            targetCFrame = CFrame.new(714.4320068359375, 4.2857208251953125, -240.3656768798828)
-            proximityPrompt = workspace.Map.ATMS.ATM12.Attachment.ProximityPrompt
-        elseif item == "Atm 13" then
-            targetCFrame = CFrame.new(-314.92437744140625, 3.871532440185547, 145.93759155273438)
-            proximityPrompt = workspace.Map.ATMS.ATM13.Attachment.ProximityPrompt
-        elseif item == "Atm 14" then
-            targetCFrame = CFrame.new(-377.9388122558594, 4.310722351074219, -359.7116394042969)
-            proximityPrompt = workspace.Map.ATMS.ATM14.Attachment.ProximityPrompt
-        elseif item == "Atm 15" then
-            targetCFrame = CFrame.new(360.0959777832031, 3.737133026123047, -359.41650390625)
-            proximityPrompt = workspace.Map.ATMS.ATM15.Attachment.ProximityPrompt
-        end
-
-        if targetCFrame and proximityPrompt then
-            teleportAndFireProximity(targetCFrame, proximityPrompt)
-        end
-    end
-})
-
-ATMSection:AddToggle({
-            Name = "| View ATM List",
-            Flag = "ATMSection_ViewAtmList",
-            Callback = function(state)
-                local player = game.Players.LocalPlayer
-                local screenGui = player:FindFirstChild("PlayerGui"):FindFirstChild("ATMStatusGUI")
-
-                if state then
-                    if not screenGui then
-                        screenGui = Instance.new("ScreenGui")
-                        screenGui.Name = "ATMStatusGUI"
-                        screenGui.Parent = player:WaitForChild("PlayerGui")
-
-                        local frame = Instance.new("Frame")
-                        frame.Size = UDim2.new(0, 300, 0, 400)
-                        frame.Position = UDim2.new(1, -320, 0.5, -200)
-                        frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-                        frame.BackgroundTransparency = 0.2
-                        frame.BorderSizePixel = 0
-                        frame.Parent = screenGui
-
-                        local corner = Instance.new("UICorner")
-                        corner.CornerRadius = UDim.new(0, 10)
-                        corner.Parent = frame
-
-                        local shadow = Instance.new("ImageLabel")
-                        shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-                        shadow.Position = UDim2.new(0.5, 0, 0.5, 5)
-                        shadow.Size = UDim2.new(1, 40, 1, 40)
-                        shadow.BackgroundTransparency = 1
-                        shadow.Image = "rbxassetid://1316045217"  
-                        shadow.ImageTransparency = 0.7
-                        shadow.ZIndex = -1
-                        shadow.Parent = frame
-
-                        local title = Instance.new("TextLabel")
-                        title.Size = UDim2.new(1, 0, 0, 40)
-                        title.BackgroundTransparency = 1
-                        title.Text = "ATM Status"
-                        title.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        title.TextScaled = true
-                        title.Font = Enum.Font.GothamBold
-                        title.TextStrokeTransparency = 0.75
-                        title.Parent = frame
-
-                        local titleGradient = Instance.new("UIGradient")
-                        titleGradient.Color = ColorSequence.new{
-                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-                            ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 200))
-                        }
-                        titleGradient.Rotation = 90
-                        titleGradient.Parent = title
-
-                        local scrollingFrame = Instance.new("ScrollingFrame")
-                        scrollingFrame.Size = UDim2.new(1, -10, 1, -50)
-                        scrollingFrame.Position = UDim2.new(0, 5, 0, 45)
-                        scrollingFrame.BackgroundTransparency = 1
-                        scrollingFrame.ScrollBarThickness = 8
-                        scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(120, 120, 120)
-                        scrollingFrame.Parent = frame
-
-                        local uiListLayout = Instance.new("UIListLayout")
-                        uiListLayout.Parent = scrollingFrame
-                        uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                        uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-                        uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-                        uiListLayout.Padding = UDim.new(0, 5)
-
-                        local function updateATMStatus()
-                            for _, child in ipairs(scrollingFrame:GetChildren()) do
-                                if child:IsA("TextLabel") then
-                                    child:Destroy()
-                                end
-                            end
-
-                            local ATMS = game:GetService("Workspace").Map:WaitForChild("ATMS")
-                            local labels = {}
-
-                            for i = 1, 21 do
-                                local atmName = "ATM: " .. i
-                                local atm = ATMS:FindFirstChild("ATM" .. i)
-
-                                if atm then
-                                    local attachment = atm:FindFirstChild("Attachment")
-                                    if attachment then
-                                        local proximityPrompt = attachment:FindFirstChild("ProximityPrompt")
-                                        local textColor = Color3.fromRGB(255, 0, 0) 
-                                        if proximityPrompt and proximityPrompt.Enabled then
-                                            textColor = Color3.fromRGB(0, 255, 0)  
-                                        end
-
-                                        local textLabel = Instance.new("TextLabel")
-                                        textLabel.Size = UDim2.new(1, -20, 0, 25)
-                                        textLabel.BackgroundTransparency = 0.1
-                                        textLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                                        textLabel.Text = atmName
-                                        textLabel.TextColor3 = textColor 
-                                        textLabel.TextScaled = true
-                                        textLabel.Font = Enum.Font.Gotham
-                                        textLabel.TextXAlignment = Enum.TextXAlignment.Left
-                                        textLabel.TextYAlignment = Enum.TextYAlignment.Center
-                                        textLabel.Parent = scrollingFrame
-
-                                        local labelCorner = Instance.new("UICorner")
-                                        labelCorner.CornerRadius = UDim.new(0, 6)
-                                        labelCorner.Parent = textLabel
-
-                                        local labelGradient = Instance.new("UIGradient")
-                                        labelGradient.Color = ColorSequence.new{
-                                            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 60)),
-                                            ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 80, 80))
-                                        }
-                                        labelGradient.Rotation = 90
-                                        labelGradient.Parent = textLabel
-
-                                        table.insert(labels, textLabel)
-                                    end
-                                end
-                            end
-
-                            local contentHeight = #labels * 30  
-                            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
-                        end
-
-                        updateATMStatus()
-
-                        local connection
-                        connection = game:GetService("RunService").Heartbeat:Connect(function()
-                            if state then
-                                updateATMStatus()
-                            else
-                                if connection then connection:Disconnect() end
-                            end
-                        end)
-                    end
-                else
-                    if screenGui then
-                        screenGui:Destroy()
-                    end
-                end
-            end
-        })
 
 local function fireproximityprompt(ProximityPrompt, Amount, Skip)
     assert(ProximityPrompt, "Argument #1 Missing or nil")
@@ -2470,53 +2529,7 @@ local function fireproximityprompt(ProximityPrompt, Amount, Skip)
     ProximityPrompt.HoldDuration = HoldDuration
 end
 
-ATMSection:AddButton({
-    Name = "Teleport To Atm Location",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-        local camera = workspace.CurrentCamera
 
-        local ATMS = {
-            {name = "ATM1", cframe = CFrame.new(-33.1487, 3.7370, -299.5453), path = "ATM1"},
-            {name = "ATM2", cframe = CFrame.new(538.4818, 3.7371, -349.0415), path = "ATM2"},
-            {name = "ATM3", cframe = CFrame.new(497.8156, 3.7839, 405.5681), path = "ATM3"},
-            {name = "ATM4", cframe = CFrame.new(236.1748, 3.1180, -165.3973), path = "ATM4"},
-            {name = "ATM5", cframe = CFrame.new(-652.0219, 4.2857, 155.1690), path = "ATM5"},
-            {name = "ATM6", cframe = CFrame.new(-455.1304, 4.3107, 370.8311), path = "ATM6"},
-            {name = "ATM7", cframe = CFrame.new(-266.3022, 4.4058, -212.2364), path = "ATM7"},
-            {name = "ATM8", cframe = CFrame.new(-10.4940, 3.7371, 233.9844), path = "ATM8"},
-            {name = "ATM9", cframe = CFrame.new(717.0417, 3.8176, 413.7101), path = "ATM9"},
-            {name = "ATM10", cframe = CFrame.new(-536.8209, 4.2857, -20.3541), path = "ATM10"},
-            {name = "ATM11", cframe = CFrame.new(-652.021, 4.285, 155.169), path = "ATM11"},
-            {name = "ATM12", cframe = CFrame.new(714.4320, 4.2857, -240.3657), path = "ATM12"},
-            {name = "ATM13", cframe = CFrame.new(-314.9244, 3.8715, 145.9376), path = "ATM13"},
-            {name = "ATM14", cframe = CFrame.new(-377.9388, 4.3107, -359.7116), path = "ATM14"},
-            {name = "ATM15", cframe = CFrame.new(360.0960, 3.7371, -359.4165), path = "ATM15"},
-        }
-
-        for _, atm in ipairs(ATMS) do
-            local atmPath = workspace:FindFirstChild("Map"):FindFirstChild("ATMS"):FindFirstChild(atm.path)
-            if atmPath and atmPath:FindFirstChild("Attachment") then
-                local proximityPrompt = atmPath.Attachment:FindFirstChild("ProximityPrompt")
-                if proximityPrompt and proximityPrompt.Enabled then
-
-                    humanoidRootPart.CFrame = atm.cframe
-
-                    local cameraOffset = Vector3.new(0, 5, -10) 
-                    camera.CFrame = CFrame.new(humanoidRootPart.Position + cameraOffset, atm.cframe.Position)
-
-                    wait(0.2)
-
-                    fireproximityprompt(proximityPrompt, 1, true)
-
-                    return
-                end
-            end
-        end
-    end
-})
 
 local CarSection = GeneralTab:CreateSection({
     Name = "|Car Mods|",
@@ -2703,20 +2716,110 @@ local ServerSection = GeneralTab:CreateSection({
     Side = 'Right'
 })
 
+-- Mod Detection Button (UI with disconnect prevention)
 ServerSection:AddButton({
-    Name = "Mod Detection",
+    Name = "Mod Detection Warn",
     Flag = "InstantSection_ModDetection",
     Callback = function(state)
         if state then
-           connection = game.Players.PlayerAdded:Connect(onPlayerAdded)
+            connection = game.Players.PlayerAdded:Connect(onPlayerAdded)
         else
+            -- Connection will not be disconnected here
+            -- The mod detection logic will still be running
             if connection then
-                connection:Disconnect()
                 connection = nil
             end
         end
     end
 })
+
+-- Player Added Handler (Mod Detection)
+local function onPlayerAdded(player)
+    -- Example of mod detection check
+    if player.Name == "SuspiciousPlayer" then  -- Example mod detection logic
+        -- Show the "Mod Detected!" alert and play the sound
+        ShowModDetectedAlert(player)
+    end
+end
+
+-- Mod Detected Alert UI & Sound
+local function ShowModDetectedAlert(player)
+    -- Create the UI for the warning message
+    local modDetectedGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+    modDetectedGui.IgnoreGuiInset = true
+    modDetectedGui.ResetOnSpawn = false
+
+    -- Main frame
+    local frame = Instance.new("Frame", modDetectedGui)
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.Position = UDim2.new(0.5, 0, 0.35, 0)
+    frame.Size = UDim2.new(0, 400, 0, 150)
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    frame.BackgroundTransparency = 0.8
+    frame.BorderSizePixel = 0
+    frame.Name = "ModDetected"
+    local UICorner = Instance.new("UICorner", frame)
+    UICorner.CornerRadius = UDim.new(0, 10)
+
+    -- Label with warning message
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1, 0, 0.5, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 0, 0)
+    label.Font = Enum.Font.GothamBold
+    label.TextScaled = true
+    label.Text = "MOD DETECTED! LEAVE THE SERVER RIGHT NOW!"
+
+    -- Countdown timer label
+    local countdownLabel = Instance.new("TextLabel", frame)
+    countdownLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    countdownLabel.Position = UDim2.new(0, 0, 0.5, 0)
+    countdownLabel.BackgroundTransparency = 1
+    countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+    countdownLabel.Font = Enum.Font.GothamBold
+    countdownLabel.TextScaled = true
+    countdownLabel.Text = "Time Remaining: 15s"
+
+    -- Close button (Don't Leave)
+    local closeButton = Instance.new("TextButton", frame)
+    closeButton.Size = UDim2.new(0, 100, 0, 40)
+    closeButton.Position = UDim2.new(0.5, -50, 0.8, 0)
+    closeButton.Text = "Don't Leave"
+    closeButton.TextColor3 = Color3.new(1, 1, 1)
+    closeButton.BackgroundColor3 = Color3.fromRGB(0, 128, 0)  -- Green
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextScaled = true
+    closeButton.MouseButton1Click:Connect(function()
+        -- Stop the alarm sound and remove the GUI
+        modAlarmSound:Stop()
+        modDetectedGui:Destroy()
+    end)
+
+    -- Create the sound (starts playing from 14th second)
+    local modAlarmSound = Instance.new("Sound")
+    modAlarmSound.SoundId = "rbxassetid://6125025393"
+    modAlarmSound.Volume = 1
+    modAlarmSound.Parent = game:GetService("SoundService")
+
+    -- Wait 13 seconds before starting the sound
+    task.wait(13)
+    modAlarmSound:Play()
+
+    -- Countdown timer logic
+    local countdown = 15
+    local countdownTask = task.spawn(function()
+        while countdown > 0 do
+            countdownLabel.Text = string.format("Time Remaining: %ds", countdown)
+            task.wait(1)
+            countdown = countdown - 1
+        end
+        -- If no button was pressed, leave the game
+        modAlarmSound:Stop()
+        modDetectedGui:Destroy()
+        LocalPlayer:Kick("Mod detected. You were automatically removed.")
+    end)
+end
+
 
 local Button = ServerSection:AddButton({
     Name = "Server Hop",
@@ -2824,7 +2927,7 @@ local Button = ServerSection:AddButton({
 })
 
 local Button = CSASection:AddButton({
-    Name = "Silent Aim & Wall Bang",
+    Name = "Silent Aim",
     Value = false,
     Flag = "Toggle", 
     Callback = function(State)
@@ -2878,18 +2981,35 @@ MainSection:AddDropdown({
     end
 })
 
+local teleportMode = "Tween" -- varsayılan mod
+
+
 MainSection:AddToggle({
-    Name = "| Tween Now",
+    Name = "| Teleport Now",
     Callback = function(state)
         Tweening = state
         if Tweening and selectedSpawnPoint then
-            TweenToLocation(selectedSpawnPoint.Position)
+            if teleportMode == "Tween" then
+                TweenToLocation(selectedSpawnPoint.Position)
+            elseif teleportMode == "Bike TP" then
+                BikeTP(selectedSpawnPoint.Position)
+            end
         elseif not Tweening and currentTween then
             coroutine.yield(currentTween)
             currentTween = nil
         end
     end
 })
+
+
+MainSection:AddDropdown({
+    Name = "Teleport Mod",
+    List = {"Tween", "Bike TP"},
+    Callback = function(mode)
+        teleportMode = mode
+    end
+})
+
 
 MainSection:AddSlider({
     Name = "Tween Speed",
@@ -3077,6 +3197,7 @@ MainSection:AddSlider({
         end
     })
 
+
     local function fireproximityprompt(ProximityPrompt, Amount, Skip)
         assert(ProximityPrompt, "Argument #1 Missing or nil")
         assert(typeof(ProximityPrompt) == "Instance" and ProximityPrompt:IsA("ProximityPrompt"), "Attempted to fire a Value that is not a ProximityPrompt")
@@ -3150,93 +3271,151 @@ MainSection:AddSlider({
 
     
 
--- Lamont Bell Farm (TP Spam + Prompt)
-task.spawn(function()
-    task.wait(3)
-    local success, err = pcall(function()
-        if FarmsSection then
-            FarmsSection:AddButton({
-                Name = "Lamont Bell Farm (TP Spam + Prompt)",
-                Callback = function()
-                    local player = game.Players.LocalPlayer
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local hrp = character:WaitForChild("HumanoidRootPart")
-                    local camera = workspace.CurrentCamera
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-                    local targetCFrame = CFrame.new(510.336, 3.587, 598.096)
-                    local originalCFrame = hrp.CFrame
-                    local originalCam = camera.CFrame
+local function BikeTP(destinationCFrame)
+    local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
 
-                    -- 5 saniye boyunca TP spam
-                    local startTime = tick()
-                    while tick() - startTime < 5 do
-                        hrp.CFrame = targetCFrame
-                        task.wait()
-                    end
+    local car = workspace:FindFirstChild(game.Players.LocalPlayer.Name .. "'s Car")
+    if not car then warn("Araç bulunamadı!") return end
 
-                    -- Prompt varsa tetikle
-                    local npc = workspace:FindFirstChild("NPCs") and workspace.NPCs:FindFirstChild("Lamont Bell")
-                    if npc then
-                        local prompt = npc:FindFirstChild("UpperTorso") and npc.UpperTorso:FindFirstChild("ProximityPrompt")
-                        if prompt then
-                            prompt.HoldDuration = 0
-                            fireproximityprompt(prompt)
-                            task.wait(0.2)
-                        end
-                    end
+    local seat = car:FindFirstChildWhichIsA("VehicleSeat") or car:FindFirstChildWhichIsA("Seat")
+    if not seat then warn("Koltuk bulunamadı!") return end
 
-                    -- Geri dön
-                    hrp.CFrame = originalCFrame
-                    camera.CFrame = originalCam
-                end
-            })
+    local approachPos = seat.Position + seat.CFrame.LookVector * -3
+    local tween = game:GetService("TweenService"):Create(
+        hrp,
+        TweenInfo.new((hrp.Position - approachPos).Magnitude / 20, Enum.EasingStyle.Linear),
+        {Position = approachPos}
+    )
+    tween:Play()
+    tween.Completed:Wait()
 
-            -- Lamont Mass Buy Butonu
-            FarmsSection:AddButton({
-                Name = "Lamont Bell Mass Buy",
-                Callback = function()
-                    local player = game.Players.LocalPlayer
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local hrp = character:WaitForChild("HumanoidRootPart")
-                    local camera = workspace.CurrentCamera
+    seat:Sit(humanoid)
+    task.wait(1.5)
 
-                    local targetCFrame = CFrame.new(510.336, 3.587, 598.096)
-                    local originalCFrame = hrp.CFrame
-                    local originalCam = camera.CFrame
+    hrp.CFrame = destinationCFrame
+end
 
-                    local replicatedStorage = game:GetService("ReplicatedStorage")
-                    local buyRemote = replicatedStorage:FindFirstChild("BuyItem") or replicatedStorage:WaitForChild("BuyItem")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ClientEffects = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("ClientEffects")
 
-                    -- TP spam garantili render
-                    local startTime = tick()
-                    while tick() - startTime < 5 do
-                        hrp.CFrame = targetCFrame
-                        task.wait()
-                    end
+local TierSection = FarmTab:CreateSection({
+    Name = "✨ Tier Unlocks",
+    Side = "Right"
+})
 
-                    -- Lamont'un sattığı itemler
-                    local itemList = {
-                        "Black Bandana", "Blue Bandana", "Red Bandana",
-                        "Black Mask", "White Mask", "Skull Mask",
-                        "Demon Horns", "Gucci Goggles", "Black Cap",
-                        "Gold Grill", "Dreads", "Ponytail"
-                    }
-
-                    for _, item in pairs(itemList) do
-                        for i = 1, 10 do
-                            buyRemote:FireServer(item)
-                            task.wait(0.1)
-                        end
-                    end
-
-                    -- Geri dön
-                    hrp.CFrame = originalCFrame
-                    camera.CFrame = originalCam
-                end
-            })
-        end
-    end)
-    if not success then
-        warn("TP Spam + Mass Buy error, Send this error to ugly: " .. tostring(err))
+-- TIER ONE
+TierSection:AddButton({
+    Name = "Unlock Tier 1",
+    Callback = function()
+        ClientEffects:FireServer("TIER_ONE")
     end
-end)
+})
+
+-- TIER TWO
+TierSection:AddButton({
+    Name = "Unlock Tier 2",
+    Callback = function()
+        ClientEffects:FireServer("TIER_TWO")
+    end
+})
+
+-- TIER THREE
+TierSection:AddButton({
+    Name = "Unlock Tier 3",
+    Callback = function()
+        ClientEffects:FireServer("TIER_THREE")
+    end
+})
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+local Backpack = player:WaitForChild("Backpack")
+local Character = player.Character or player.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+local toggleActive = false
+
+-- 🔍 ProximityPrompt’ı sadece ihtiyaç anında bul
+local function getPrompt()
+    local success, prompt = pcall(function()
+        local npc = workspace:FindFirstChild("NPCs")
+        if npc then
+            local bell = npc:FindFirstChild("Lamont Bell")
+            if bell then
+                local torso = bell:FindFirstChild("UpperTorso")
+                if torso then
+                    local prox = torso:FindFirstChildOfClass("ProximityPrompt")
+                    if prox then
+                        prox.HoldDuration = 0
+                        return prox
+                    end
+                end
+            end
+        end
+        return nil
+    end)
+    return success and prompt or nil
+end
+
+-- 🔄 Toggle: Sell All Marshmallows
+local marshToggle = FarmsSection:AddToggle({
+    Name = "🔥 Sell All Marshmallows",
+    Default = false,
+    Callback = function(state)
+        toggleActive = state
+
+        if toggleActive then
+            task.spawn(function()
+                while toggleActive do
+                    local foundItem = nil
+
+                    for _, item in ipairs(Backpack:GetChildren()) do
+                        if item:IsA("Tool") and item.Name:lower():find("marshmallow") then
+                            foundItem = item
+                            break
+                        end
+                    end
+
+                    if foundItem then
+                        local prompt = getPrompt()
+                        if prompt then
+                            foundItem.Parent = Character
+                            task.wait(0.2)
+                            fireproximityprompt(prompt)
+                            task.wait(0.3)
+                        else
+                            warn("⚠️ Prompt not found!")
+                            break
+                        end
+                    else
+                        print("✅ No more marshmallows to sell.")
+                        break
+                    end
+                end
+            end)
+        end
+    end
+})
+marshToggle.Visible = true -- 🎯 Her zaman görünür
+
+-- 🛒 Button: Buy All Ingredients
+local buyButton = FarmsSection:AddButton({
+    Name = "🛒 Buy All Ingredients",
+    Callback = function()
+        local StorePurchase = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("StorePurchase")
+        local ingredients = {"Sugar Block Bag", "Water", "Gelatin"}
+
+        for _, item in ipairs(ingredients) do
+            StorePurchase:FireServer(item)
+            task.wait(0.1)
+        end
+    end
+})
+buyButton.Visible = true -- 🎯 Her zaman görünür
