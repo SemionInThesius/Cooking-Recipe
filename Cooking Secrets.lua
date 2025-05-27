@@ -35,6 +35,10 @@ local scriptMap = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/fixed%20Cooking.txt",
         name = "Tha Bronx 3"
     },
+    [142823291] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20murder",
+        name = "Murder Mystery 2"
+    },
     [18687417158] = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Saken",
         name = "Forsaken"
