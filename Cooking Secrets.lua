@@ -44,8 +44,8 @@ local scriptMap = {
         name = "Forsaken"
     },
     [16370122705] = {
-        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Saken",
-        name = "Forsaken"
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cookn'g%20revamp",
+        name = "YBA: Reborn"
     },
 }
 
