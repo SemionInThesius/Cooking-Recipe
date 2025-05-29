@@ -43,6 +43,10 @@ local scriptMap = {
         url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Saken",
         name = "Forsaken"
     },
+    [16370122705] = {
+        url = "https://raw.githubusercontent.com/SemionInThesius/Cooking-Recipe/refs/heads/main/Cooking%20Saken",
+        name = "Forsaken"
+    },
 }
 
 local universalKey = "tungtungtung"
