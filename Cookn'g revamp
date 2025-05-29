@@ -1,0 +1,288 @@
+-- ✅ Wait for game to fully load
+while not game:IsLoaded() do wait() end
+
+-- ✅ Load Rayfield UI Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- ✅ Create Main Window
+local Window = Rayfield:CreateWindow({
+    Name = "AutoFarm | Rayfield GUI",
+    LoadingTitle = "AutoFarm Suite",
+    LoadingSubtitle = "Powered by Rayfield",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil,
+        FileName = "AutoFarmSettings"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "",
+        RememberJoins = false
+    },
+    KeySystem = false,
+})
+
+-- ✅ Create Tabs
+local Tab = Window:CreateTab("AutoFarm", 4483362458)
+local SellTab = Window:CreateTab("Sell", 4483362458)
+
+-- ✅ AutoSell Control
+local autoSellItems = {
+    "Rokakaka", "Lucky Arrow", "Pure Rokakaka", "Mysterious Arrow", "Christmas Present",
+    "DIO's Diary", "Ancient Scroll", "Blue Candy", "Steel Ball",
+    "Diamond", "Zeppelin's Headband"
+}
+
+SellTab:CreateDropdown({
+    Name = "🛒 AutoSell Item Seç",
+    Options = {"Rokakaka", "Lucky Arrow", "Pure Rokakaka", "Mysterious Arrow", "Christmas Present",
+    "DIO's Diary", "Ancient Scroll", "Blue Candy", "Steel Ball",
+    "Diamond", "Zeppelin's Headband"},
+    CurrentOption = autoSellItems[1],
+    MultipleOptions = true,
+    Callback = function(selected)
+        autoSellItems = selected
+        print("[AUTOSELL] Seçili itemler:", table.concat(autoSellItems, ", "))
+    end
+})
+
+-- ✅ Toggle for continuous AutoSell
+local autoSellEnabled = false
+SellTab:CreateToggle({
+    Name = "♻️ AutoSell Toggle",
+    CurrentValue = false,
+    Callback = function(state)
+        autoSellEnabled = state
+        print("[AUTOSELL] Otomatik satış modu:", state and "Açık" or "Kapalı")
+    end
+})
+
+-- ✅ Otomatik satış dinleyicisi
+local function checkAutoSell()
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if not autoSellEnabled then return end
+        local player = game.Players.LocalPlayer
+        local backpack = player.Backpack
+
+        for _, tool in pairs(backpack:GetChildren()) do
+            if table.find(autoSellItems, tool.Name) then
+                -- Equip the item
+                local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:EquipTool(tool)
+                end
+
+                print("[AUTOSELL] " .. tool.Name .. " algılandı, satış başlatılıyor...")
+
+                local args1 = {
+                    "DialogueInteracted",
+                    {
+                        DialogueName = "Merchant",
+                        Speaker = "ShiftPlox, The Travelling Merchant"
+                    }
+                }
+                player.Character:WaitForChild("RemoteEvent"):FireServer(unpack(args1))
+                task.wait(0.2)
+
+                local args2 = {
+                    "EndDialogue",
+                    {
+                        Option = "Option2",
+                        Dialogue = "Dialogue3",
+                        NPC = "Merchant"
+                    }
+                }
+                player.Character:WaitForChild("RemoteEvent"):FireServer(unpack(args2))
+                task.wait(0.5)
+            end
+        end
+    end)
+end
+
+checkAutoSell()
+
+
+-- ✅ Create Section
+local Section = Tab:CreateSection("Farm Kontrolleri")
+Tab:CreateLabel("✅ Rayfield GUI yüklendi ve tab çalışıyor!")
+
+-- ✅ Autofarm Control
+local autofarmEnabled = false
+local autofarmThread
+local returnCFrame = nil
+local noclipConnection
+local forceTPConnection
+local selectedItems = {}
+local ItemsFolder = workspace:WaitForChild("Item_Spawns"):WaitForChild("Items")
+
+for _, item in pairs(ItemsFolder:GetChildren()) do
+    if not table.find(selectedItems, item.Name) then
+        table.insert(selectedItems, item.Name)
+    end
+end
+
+local selectedDropdown = selectedItems[1] or ""
+Tab:CreateDropdown({
+    Name = "🎯 Select Item",
+    Options = selectedItems,
+    CurrentOption = selectedDropdown,
+    Callback = function(value)
+        selectedDropdown = value
+        print("[FILTER] Seçili item: ", value)
+    end
+})
+
+local function enableNoClip()
+    local player = game.Players.LocalPlayer
+    noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid:ChangeState(11)
+        end
+    end)
+end
+
+local function disableNoClip()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+end
+
+local function forceTPLoop(hrp, position)
+    if stopForceTP then stopForceTP() end
+    forceTPConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if hrp and autofarmEnabled then
+            hrp.CFrame = CFrame.new(position)
+        end
+    end)
+end
+
+local function stopForceTP()
+    if forceTPConnection then
+        forceTPConnection:Disconnect()
+        forceTPConnection = nil
+    end
+end
+
+local function startAutofarm(filterName)
+    autofarmThread = task.spawn(function()
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        returnCFrame = hrp.CFrame
+
+        enableNoClip()
+
+        while autofarmEnabled do
+            for _, item in pairs(ItemsFolder:GetChildren()) do
+                if not autofarmEnabled then break end
+                if item:FindFirstChild("ClickDetector") and (not filterName or item.Name == filterName) then
+                    char = player.Character or player.CharacterAdded:Wait()
+                    hrp = char:FindFirstChild("HumanoidRootPart")
+                    if not hrp then warn("[HATA] HumanoidRootPart bulunamadı!") continue end
+
+                    local targetPos = item:IsA("Model") and item:GetPivot().Position or item.Position
+                    local tpPosition = Vector3.new(targetPos.X, targetPos.Y - 6, targetPos.Z)
+                    print("[TP] " .. item.Name .. " altına TP spam başlatılıyor...")
+
+                    forceTPLoop(hrp, tpPosition)
+                    task.wait(0.25)
+
+                    local success, err = pcall(function()
+                        fireclickdetector(item.ClickDetector)
+                    end)
+                    if not success then
+                        warn("[FIRE HATASI] ClickDetector tetiklenemedi:", err)
+                    else
+                        print("[CLICK] " .. item.Name .. " başarıyla tıklandı.")
+                    end
+
+                    task.wait(2)
+                    stopForceTP()
+                end
+            end
+            task.wait(1)
+        end
+
+        stopForceTP()
+        disableNoClip()
+
+        char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CFrame = CFrame.new(-155.333481, 828.570557, -45.802513)
+            print("[AUTO] Belirlenen konuma geri dönüldü.")
+        end
+    end)
+end
+
+Tab:CreateToggle({
+    Name = "🚀 AutoFarm Selected Item",
+    CurrentValue = false,
+    Callback = function(state)
+        autofarmEnabled = state
+        if state then
+            print("[TOGGLE] AutoFarm açıldı (selected item mode).")
+            startAutofarm(selectedDropdown)
+        else
+            print("[TOGGLE] AutoFarm kapatıldı.")
+            if autofarmThread then
+                task.cancel(autofarmThread)
+                autofarmThread = nil
+            end
+        end
+    end
+})
+
+Tab:CreateToggle({
+    Name = "🔥 Full AutoFarm (All Items)",
+    CurrentValue = false,
+    Callback = function(state)
+        autofarmEnabled = state
+        if state then
+            print("[TOGGLE] Full AutoFarm açıldı (tüm itemler).")
+            startAutofarm(nil)
+        else
+            print("[TOGGLE] Full AutoFarm kapatıldı.")
+            if autofarmThread then
+                task.cancel(autofarmThread)
+                autofarmThread = nil
+            end
+        end
+    end
+})
+
+-- ✅ Toggle for Meteorite Collection
+local meteoriteEnabled = false
+Tab:CreateToggle({
+    Name = "☄️ Meteorite AutoCollect",
+    CurrentValue = false,
+    Callback = function(state)
+        meteoriteEnabled = state
+        print("[METEORITE] AutoCollect modu:", state and "Açık" or "Kapalı")
+    end
+})
+
+-- ✅ Meteorite Yakalama
+local function monitorMeteorite()
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if not meteoriteEnabled then return end
+        local meteorite = workspace:FindFirstChild("Meteorite")
+        if meteorite and meteorite:FindFirstChild("ProximityPrompt") then
+            local prompt = meteorite.ProximityPrompt
+            prompt.MaxActivationDistance = 9999999999
+            prompt.HoldDuration = 0
+
+            local player = game.Players.LocalPlayer
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = meteorite.CFrame + Vector3.new(0, 5, 0)
+                fireproximityprompt(prompt)
+                print("[METEORITE] Meteorite alındı!")
+            end
+        end
+    end)
+end
+
+monitorMeteorite()
