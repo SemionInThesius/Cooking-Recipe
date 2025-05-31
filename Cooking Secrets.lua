@@ -49,8 +49,8 @@ local scriptMap = {
     },
 }
 
-local universalKey = "ihatebypasses"
-local expiredKey = "tungtungtung"
+local universalKey = "firstkeytesting"
+local expiredKey = "ihatebypasses"
 
 
 local a1 = {104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,99,111,109,47}
